@@ -12,10 +12,10 @@ struct CPU {
     l: u8,
     i: u8,
     r: u8,
-    ixl: u8,
     ixh: u8,
-    iyl: u8,
+    ixl: u8,
     iyh: u8,
+    iyl: u8,
 
     // 16 Bit Registers
     pc: u16,

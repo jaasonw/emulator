@@ -56,6 +56,12 @@ fn dump_registers(cpu: &CPU) {
     println!("f: {:X}", cpu.get_f());
     println!("h: {:X}", cpu.get_h());
     println!("l: {:X}", cpu.get_l());
+    println!("i: {:X}", cpu.get_i());
+    println!("r: {:X}", cpu.get_r());
+    println!("ixh: {:X}", cpu.get_ixh());
+    println!("ixl: {:X}", cpu.get_ixl());
+    println!("iyh: {:X}", cpu.get_iyh());
+    println!("iyl: {:X}", cpu.get_iyl());
     println!("pc: {:X}", cpu.get_pc());
     println!("sp: {:X}", cpu.get_sp());
     println!("af: {:X}", cpu.get_af());
@@ -105,6 +111,22 @@ impl CPU {
 
     fn get_r(&self) -> u8 {
         self.r
+    }
+
+    fn get_ixh(&self) -> u8 {
+        self.ixh
+    }
+
+    fn get_ixl(&self) -> u8 {
+        self.ixl
+    }
+
+    fn get_iyh(&self) -> u8 {
+        self.iyh
+    }
+
+    fn get_iyl(&self) -> u8 {
+        self.iyl
     }
 
     fn get_pc(&self) -> u16 {
@@ -178,6 +200,22 @@ impl CPU {
 
     fn set_r(&mut self, value: u8) {
         self.r = value;
+    }
+
+    fn set_ixh(&mut self, value: u8) {
+        self.ixh = value;
+    }
+
+    fn set_ixl(&mut self, value: u8) {
+        self.ixl = value;
+    }
+
+    fn set_iyh(&mut self, value: u8) {
+        self.iyh = value;
+    }
+
+    fn set_iyl(&mut self, value: u8) {
+        self.iyl = value;
     }
 
     fn set_pc(&mut self, value: u16) {

@@ -1,26 +1,26 @@
 // Reference: http://z80-heaven.wikidot.com/the-registers-and-memory
 #[derive(Default)]
-struct CPU {
+pub struct CPU {
     // 8 Bit registers
-    a: u8,
-    b: u8,
-    c: u8,
-    d: u8,
-    e: u8,
-    f: u8,
-    h: u8,
-    l: u8,
-    i: u8,
-    r: u8,
-    ixh: u8,
-    ixl: u8,
-    iyh: u8,
-    iyl: u8,
+    a: u8,   // Accumulator
+    b: u8,   // General purpose
+    c: u8,   // General purpose
+    d: u8,   // General purpose
+    e: u8,   // General purpose
+    f: u8,   // Flags
+    h: u8,   // General purpose
+    l: u8,   // General purpose
+    i: u8,   // Interrupt vector
+    r: u8,   // Memory refresh
+    ixh: u8, // Index register
+    ixl: u8, // Index register
+    iyh: u8, // Index register
+    iyl: u8, // Index register
 
     // 16 Bit Registers
-    pc: u16,
-    sp: u16,
-    hl: u16,
+    pc: u16, // Program counter
+    sp: u16, // Stack pointer
+    hl: u16, // General purpose
 }
 
 pub fn run() {
@@ -73,185 +73,185 @@ fn dump_registers(cpu: &CPU) {
 }
 
 impl CPU {
-    fn get_a(&self) -> u8 {
+    pub fn get_a(&self) -> u8 {
         self.a
     }
 
-    fn get_b(&self) -> u8 {
+    pub fn get_b(&self) -> u8 {
         self.b
     }
 
-    fn get_c(&self) -> u8 {
+    pub fn get_c(&self) -> u8 {
         self.c
     }
 
-    fn get_d(&self) -> u8 {
+    pub fn get_d(&self) -> u8 {
         self.d
     }
 
-    fn get_e(&self) -> u8 {
+    pub fn get_e(&self) -> u8 {
         self.e
     }
 
-    fn get_f(&self) -> u8 {
+    pub fn get_f(&self) -> u8 {
         self.f
     }
 
-    fn get_h(&self) -> u8 {
+    pub fn get_h(&self) -> u8 {
         self.h
     }
 
-    fn get_l(&self) -> u8 {
+    pub fn get_l(&self) -> u8 {
         self.l
     }
 
-    fn get_i(&self) -> u8 {
+    pub fn get_i(&self) -> u8 {
         self.i
     }
 
-    fn get_r(&self) -> u8 {
+    pub fn get_r(&self) -> u8 {
         self.r
     }
 
-    fn get_ixh(&self) -> u8 {
+    pub fn get_ixh(&self) -> u8 {
         self.ixh
     }
 
-    fn get_ixl(&self) -> u8 {
+    pub fn get_ixl(&self) -> u8 {
         self.ixl
     }
 
-    fn get_iyh(&self) -> u8 {
+    pub fn get_iyh(&self) -> u8 {
         self.iyh
     }
 
-    fn get_iyl(&self) -> u8 {
+    pub fn get_iyl(&self) -> u8 {
         self.iyl
     }
 
-    fn get_pc(&self) -> u16 {
+    pub fn get_pc(&self) -> u16 {
         self.pc
     }
 
-    fn get_sp(&self) -> u16 {
+    pub fn get_sp(&self) -> u16 {
         self.sp
     }
 
-    fn get_hl(&self) -> u16 {
+    pub fn get_hl(&self) -> u16 {
         self.hl
     }
 
-    fn get_af(&self) -> u16 {
+    pub fn get_af(&self) -> u16 {
         (self.a as u16) << 8 | self.f as u16
     }
 
-    fn get_bc(&self) -> u16 {
+    pub fn get_bc(&self) -> u16 {
         (self.b as u16) << 8 | self.c as u16
     }
 
-    fn get_de(&self) -> u16 {
+    pub fn get_de(&self) -> u16 {
         (self.d as u16) << 8 | self.e as u16
     }
 
-    fn get_ix(&self) -> u16 {
+    pub fn get_ix(&self) -> u16 {
         (self.ixh as u16) << 8 | self.ixl as u16
     }
 
-    fn get_iy(&self) -> u16 {
+    pub fn get_iy(&self) -> u16 {
         (self.iyh as u16) << 8 | self.iyl as u16
     }
 
     // setters
-    fn set_a(&mut self, value: u8) {
+    pub fn set_a(&mut self, value: u8) {
         self.a = value;
     }
 
-    fn set_b(&mut self, value: u8) {
+    pub fn set_b(&mut self, value: u8) {
         self.b = value;
     }
 
-    fn set_c(&mut self, value: u8) {
+    pub fn set_c(&mut self, value: u8) {
         self.c = value;
     }
 
-    fn set_d(&mut self, value: u8) {
+    pub fn set_d(&mut self, value: u8) {
         self.d = value;
     }
 
-    fn set_e(&mut self, value: u8) {
+    pub fn set_e(&mut self, value: u8) {
         self.e = value;
     }
 
-    fn set_f(&mut self, value: u8) {
+    pub fn set_f(&mut self, value: u8) {
         self.f = value;
     }
 
-    fn set_h(&mut self, value: u8) {
+    pub fn set_h(&mut self, value: u8) {
         self.h = value;
     }
 
-    fn set_l(&mut self, value: u8) {
+    pub fn set_l(&mut self, value: u8) {
         self.l = value;
     }
 
-    fn set_i(&mut self, value: u8) {
+    pub fn set_i(&mut self, value: u8) {
         self.i = value;
     }
 
-    fn set_r(&mut self, value: u8) {
+    pub fn set_r(&mut self, value: u8) {
         self.r = value;
     }
 
-    fn set_ixh(&mut self, value: u8) {
+    pub fn set_ixh(&mut self, value: u8) {
         self.ixh = value;
     }
 
-    fn set_ixl(&mut self, value: u8) {
+    pub fn set_ixl(&mut self, value: u8) {
         self.ixl = value;
     }
 
-    fn set_iyh(&mut self, value: u8) {
+    pub fn set_iyh(&mut self, value: u8) {
         self.iyh = value;
     }
 
-    fn set_iyl(&mut self, value: u8) {
+    pub fn set_iyl(&mut self, value: u8) {
         self.iyl = value;
     }
 
-    fn set_pc(&mut self, value: u16) {
+    pub fn set_pc(&mut self, value: u16) {
         self.pc = value;
     }
 
-    fn set_sp(&mut self, value: u16) {
+    pub fn set_sp(&mut self, value: u16) {
         self.sp = value;
     }
 
-    fn set_af(&mut self, value: u16) {
+    pub fn set_af(&mut self, value: u16) {
         self.a = (value >> 8) as u8;
         self.f = value as u8;
     }
 
-    fn set_bc(&mut self, value: u16) {
+    pub fn set_bc(&mut self, value: u16) {
         self.b = (value >> 8) as u8;
         self.c = value as u8;
     }
 
-    fn set_de(&mut self, value: u16) {
+    pub fn set_de(&mut self, value: u16) {
         self.d = (value >> 8) as u8;
         self.e = value as u8;
     }
 
-    fn set_hl(&mut self, value: u16) {
+    pub fn set_hl(&mut self, value: u16) {
         self.hl = value;
     }
 
-    fn set_ix(&mut self, value: u16) {
-        self.ixh = (value >> 8) as u8;
-        self.ixl = value as u8;
+    pub fn set_ix(&mut self, value: u16) {
+        self.set_ixh((value >> 8) as u8);
+        self.set_ixl(value as u8);
     }
 
-    fn set_iy(&mut self, value: u16) {
-        self.iyh = (value >> 8) as u8;
-        self.iyl = value as u8;
+    pub fn set_iy(&mut self, value: u16) {
+        self.set_iyh((value >> 8) as u8);
+        self.set_iyl(value as u8);
     }
 }

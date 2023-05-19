@@ -1,5 +1,15 @@
 // Reference: http://z80-heaven.wikidot.com/the-registers-and-memory
-#[derive(Default)]
+
+// flags
+const Z_FLAG: u8 = 7; // Zero flag
+const N_FLAG: u8 = 6; // Add/Subtract flag
+const H_FLAG: u8 = 5; // Half carry flag
+const C_FLAG: u8 = 4; // Carry flag
+
+// 4.194304 MHz
+const CPU_FREQUENCY: f64 = 4194304.0;
+
+// #[derive(Default)]
 pub struct CPU {
     // 8 Bit registers
     a: u8,   // Accumulator
@@ -21,6 +31,30 @@ pub struct CPU {
     pc: u16, // Program counter
     sp: u16, // Stack pointer
     hl: u16, // General purpose
+}
+
+impl Default for CPU {
+    fn default() -> Self {
+        CPU {
+            a: 0x01,
+            b: 0x00,
+            c: 0x13,
+            d: 0x00,
+            e: 0xD8,
+            f: 0xB0,
+            h: 0x01,
+            l: 0x4D,
+            i: 0,
+            r: 0,
+            ixh: 0,
+            ixl: 0,
+            iyh: 0,
+            iyl: 0,
+            pc: 0x0100,
+            sp: 0xFFFE,
+            hl: 0,
+        }
+    }
 }
 
 pub fn run() {
@@ -47,32 +81,39 @@ pub fn run() {
     dump_registers(&cpu);
 }
 
-fn dump_registers(cpu: &CPU) {
-    println!("a: {:X}", cpu.get_a());
-    println!("b: {:X}", cpu.get_b());
-    println!("c: {:X}", cpu.get_c());
-    println!("d: {:X}", cpu.get_d());
-    println!("e: {:X}", cpu.get_e());
-    println!("f: {:X}", cpu.get_f());
-    println!("h: {:X}", cpu.get_h());
-    println!("l: {:X}", cpu.get_l());
-    println!("i: {:X}", cpu.get_i());
-    println!("r: {:X}", cpu.get_r());
-    println!("ixh: {:X}", cpu.get_ixh());
-    println!("ixl: {:X}", cpu.get_ixl());
-    println!("iyh: {:X}", cpu.get_iyh());
-    println!("iyl: {:X}", cpu.get_iyl());
-    println!("pc: {:X}", cpu.get_pc());
-    println!("sp: {:X}", cpu.get_sp());
-    println!("af: {:X}", cpu.get_af());
-    println!("bc: {:X}", cpu.get_bc());
-    println!("de: {:X}", cpu.get_de());
-    println!("hl: {:X}", cpu.get_hl());
-    println!("ix: {:X}", cpu.get_ix());
-    println!("iy: {:X}", cpu.get_iy());
+pub fn dump_registers(cpu: &CPU) {
+    println!("a: {:#04X}", cpu.get_a());
+    println!("f: {:#04X}", cpu.get_f());
+    println!("b: {:#04X}", cpu.get_b());
+    println!("c: {:#04X}", cpu.get_c());
+    println!("d: {:#04X}", cpu.get_d());
+    println!("e: {:#04X}", cpu.get_e());
+    println!("h: {:#04X}", cpu.get_h());
+    println!("l: {:#04X}", cpu.get_l());
+    println!("i: {:#06X}", cpu.get_i());
+    println!("r: {:#06X}", cpu.get_r());
+    println!("af: {:#06X}", cpu.get_af());
+    println!("bc: {:#06X}", cpu.get_bc());
+    println!("de: {:#06X}", cpu.get_de());
+    println!("hl: {:#06X}", cpu.get_hl());
+    println!("pc: {:#06X}", cpu.get_pc());
+    println!("sp: {:#06X}", cpu.get_sp());
+    // println!("ix: {:#06X}", cpu.get_ix());
+    // println!("iy: {:#06X}", cpu.get_iy());
+    // println!("ixh: {:#06X}", cpu.get_ixh());
+    // println!("ixl: {:#06X}", cpu.get_ixl());
+    // println!("iyh: {:#06X}", cpu.get_iyh());
+    // println!("iyl: {:#06X}", cpu.get_iyl());
 }
 
 impl CPU {
+    pub fn step(&mut self, seconds: f64) {
+        let cycles = (seconds * CPU_FREQUENCY) as u64;
+        for _ in 0..cycles {
+            // fetch
+        }
+    }
+
     pub fn get_a(&self) -> u8 {
         self.a
     }

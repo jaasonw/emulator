@@ -23,7 +23,7 @@ pub fn read_byte(gb: &mut Gameboy) -> u16 {
     return byte.into();
 }
 
-pub fn step(gb: &mut Gameboy) -> i64 {
+pub fn step_cpu(gb: &mut Gameboy) -> i64 {
     let mut cycles = 0;
     // fetch
     let opcode = read_byte(gb);

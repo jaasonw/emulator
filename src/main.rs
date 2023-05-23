@@ -7,7 +7,7 @@ use std::{
 
 mod cpu;
 mod gameboy;
-pub mod instruction;
+mod instruction;
 
 fn main() {
     let mut gameboy = gameboy::create_gameboy();
@@ -16,8 +16,6 @@ fn main() {
     println!("{:?}", gameboy.ram);
 
     // loop at 4.2 MHz
-    let mut timer = Instant::now();
-    let timer_period = Duration::from_millis((1000.0 / cpu::CPU_FREQUENCY) as u64);
     loop {
         let start_time = Instant::now();
         // 16.6 ms as nanoseconds
@@ -28,10 +26,7 @@ fn main() {
         let mut emulated_cycles: i64 = 0;
 
         while emulated_cycles < cycles_per_frame {
-            emulated_cycles += gameboy::step(&mut gameboy);
-            // println!("emulated_cycles: {:?}", emulated_cycles);
-            // println!("cycles_per_frame: {:?}", cycles_per_frame);
-            // emulated_cycles += 1.0;
+            emulated_cycles += gameboy::step_cpu(&mut gameboy);
         }
 
         let elapsed_time = start_time.elapsed();

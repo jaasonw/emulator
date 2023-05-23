@@ -1,5 +1,170 @@
 use crate::gameboy;
 
+// ALU functions
+fn increment_8bit(gb: &mut gameboy::Gameboy, register: &str) -> u8 {
+    match register {
+        "a" => {
+            let a = gb.cpu.get_a();
+            let result = a.wrapping_add(1);
+            gb.cpu.set_a(result);
+            return result;
+        }
+        "b" => {
+            let b = gb.cpu.get_b();
+            let result = b.wrapping_add(1);
+            gb.cpu.set_b(result);
+            return result;
+        }
+        "c" => {
+            let c = gb.cpu.get_c();
+            let result = c.wrapping_add(1);
+            gb.cpu.set_c(result);
+            return result;
+        }
+        "d" => {
+            let d = gb.cpu.get_d();
+            let result = d.wrapping_add(1);
+            gb.cpu.set_d(result);
+            return result;
+        }
+        "e" => {
+            let e = gb.cpu.get_e();
+            let result = e.wrapping_add(1);
+            gb.cpu.set_e(result);
+            return result;
+        }
+        "h" => {
+            let h = gb.cpu.get_h();
+            let result = h.wrapping_add(1);
+            gb.cpu.set_h(result);
+            return result;
+        }
+        "l" => {
+            let l = gb.cpu.get_l();
+            let result = l.wrapping_add(1);
+            gb.cpu.set_l(result);
+            return result;
+        }
+        _ => {
+            panic!("Invalid register");
+        }
+    }
+}
+
+fn decrement_8bit(gb: &mut gameboy::Gameboy, register: &str) -> u8 {
+    match register {
+        "a" => {
+            let a = gb.cpu.get_a();
+            let result = a.wrapping_sub(1);
+            gb.cpu.set_a(result);
+            return result;
+        }
+        "b" => {
+            let b = gb.cpu.get_b();
+            let result = b.wrapping_sub(1);
+            gb.cpu.set_b(result);
+            return result;
+        }
+        "c" => {
+            let c = gb.cpu.get_c();
+            let result = c.wrapping_sub(1);
+            gb.cpu.set_c(result);
+            return result;
+        }
+        "d" => {
+            let d = gb.cpu.get_d();
+            let result = d.wrapping_sub(1);
+            gb.cpu.set_d(result);
+            return result;
+        }
+        "e" => {
+            let e = gb.cpu.get_e();
+            let result = e.wrapping_sub(1);
+            gb.cpu.set_e(result);
+            return result;
+        }
+        "h" => {
+            let h = gb.cpu.get_h();
+            let result = h.wrapping_sub(1);
+            gb.cpu.set_h(result);
+            return result;
+        }
+        "l" => {
+            let l = gb.cpu.get_l();
+            let result = l.wrapping_sub(1);
+            gb.cpu.set_l(result);
+            return result;
+        }
+        _ => {
+            panic!("Invalid register");
+        }
+    }
+}
+
+fn increment_16bit(gb: &mut gameboy::Gameboy, register: &str) -> u16 {
+    match register {
+        "bc" => {
+            let bc = gb.cpu.get_bc();
+            let result = bc.wrapping_add(1);
+            gb.cpu.set_bc(result);
+            return result;
+        }
+        "de" => {
+            let de = gb.cpu.get_de();
+            let result = de.wrapping_add(1);
+            gb.cpu.set_de(result);
+            return result;
+        }
+        "hl" => {
+            let hl = gb.cpu.get_hl();
+            let result = hl.wrapping_add(1);
+            gb.cpu.set_hl(result);
+            return result;
+        }
+        "sp" => {
+            let sp = gb.cpu.get_sp();
+            let result = sp.wrapping_add(1);
+            gb.cpu.set_sp(result);
+            return result;
+        }
+        _ => {
+            panic!("Invalid register");
+        }
+    }
+}
+
+fn decrement_16bit(gb: &mut gameboy::Gameboy, register: &str) -> u16 {
+    match register {
+        "bc" => {
+            let bc = gb.cpu.get_bc();
+            let result = bc.wrapping_sub(1);
+            gb.cpu.set_bc(result);
+            return result;
+        }
+        "de" => {
+            let de = gb.cpu.get_de();
+            let result = de.wrapping_sub(1);
+            gb.cpu.set_de(result);
+            return result;
+        }
+        "hl" => {
+            let hl = gb.cpu.get_hl();
+            let result = hl.wrapping_sub(1);
+            gb.cpu.set_hl(result);
+            return result;
+        }
+        "sp" => {
+            let sp = gb.cpu.get_sp();
+            let result = sp.wrapping_sub(1);
+            gb.cpu.set_sp(result);
+            return result;
+        }
+        _ => {
+            panic!("Invalid register");
+        }
+    }
+}
+
 pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
     let mut cycles: i64 = 0;
 
@@ -18,14 +183,17 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x03 => {
             // INC BC
+            increment_16bit(gb, "bc");
             cycles += 8;
         }
         0x04 => {
             // INC B
+            increment_8bit(gb, "b");
             cycles += 4;
         }
         0x05 => {
             // DEC B
+            decrement_8bit(gb, "b");
             cycles += 4;
         }
         0x06 => {
@@ -50,6 +218,7 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x0B => {
             // DEC BC
+            decrement_16bit(gb, "bc");
             cycles += 8;
         }
         0x0C => {
@@ -58,6 +227,7 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x0D => {
             // DEC C
+            decrement_8bit(gb, "c");
             cycles += 4;
         }
         0x0E => {
@@ -82,14 +252,17 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x13 => {
             // INC DE
+            increment_16bit(gb, "de");
             cycles += 8;
         }
         0x14 => {
             // INC D
+            increment_8bit(gb, "d");
             cycles += 4;
         }
         0x15 => {
             // DEC D
+            decrement_8bit(gb, "d");
             cycles += 4;
         }
         0x16 => {
@@ -114,14 +287,17 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x1B => {
             // DEC DE
+            decrement_16bit(gb, "de");
             cycles += 8;
         }
         0x1C => {
             // INC E
+            increment_8bit(gb, "e");
             cycles += 4;
         }
         0x1D => {
             // DEC E
+            decrement_8bit(gb, "e");
             cycles += 4;
         }
         0x1E => {
@@ -149,14 +325,17 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x23 => {
             // INC HL
+            increment_16bit(gb, "hl");
             cycles += 8;
         }
         0x24 => {
             // INC H
+            increment_8bit(gb, "h");
             cycles += 4;
         }
         0x25 => {
             // DEC H
+            decrement_8bit(gb, "h");
             cycles += 4;
         }
         0x26 => {
@@ -184,14 +363,17 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x2B => {
             // DEC HL
+            decrement_16bit(gb, "hl");
             cycles += 8;
         }
         0x2C => {
             // INC L
+            increment_8bit(gb, "l");
             cycles += 4;
         }
         0x2D => {
             // DEC L
+            decrement_8bit(gb, "l");
             cycles += 4;
         }
         0x2E => {
@@ -219,14 +401,17 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x33 => {
             // INC SP
+            increment_16bit(gb, "sp");
             cycles += 8;
         }
         0x34 => {
             // INC HL
+            increment_16bit(gb, "hl");
             cycles += 12;
         }
         0x35 => {
             // DEC HL
+            decrement_16bit(gb, "hl");
             cycles += 12;
         }
         0x36 => {
@@ -254,14 +439,17 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x3B => {
             // DEC SP
+            decrement_16bit(gb, "sp");
             cycles += 8;
         }
         0x3C => {
             // INC A
+            increment_8bit(gb, "a");
             cycles += 4;
         }
         0x3D => {
             // DEC A
+            decrement_8bit(gb, "a");
             cycles += 4;
         }
         0x3E => {

@@ -1,5 +1,43 @@
+use std::fs::File;
+use std::io::Read;
+use std::{
+    thread,
+    time::{Duration, Instant},
+};
+
 mod cpu;
+mod gameboy;
+pub mod instruction;
 
 fn main() {
-    cpu::run();
+    let mut gameboy = gameboy::create_gameboy();
+    let mut bootloader_file = File::open("bootloader.bin").unwrap();
+    bootloader_file.read(&mut gameboy.ram).unwrap();
+    println!("{:?}", gameboy.ram);
+
+    // loop at 4.2 MHz
+    let mut timer = Instant::now();
+    let timer_period = Duration::from_millis((1000.0 / cpu::CPU_FREQUENCY) as u64);
+    loop {
+        let start_time = Instant::now();
+        // 16.6 ms as nanoseconds
+        let frame_time = Duration::new(0, 16600000);
+        // cycles are in t-cycles
+        // reference: http://www.codeslinger.co.uk/pages/projects/gameboy/opcodes.html
+        let cycles_per_frame = (cpu::CPU_FREQUENCY / 60.0) as i64;
+        let mut emulated_cycles: i64 = 0;
+
+        while emulated_cycles < cycles_per_frame {
+            emulated_cycles += gameboy::step(&mut gameboy);
+            // println!("emulated_cycles: {:?}", emulated_cycles);
+            // println!("cycles_per_frame: {:?}", cycles_per_frame);
+            // emulated_cycles += 1.0;
+        }
+
+        let elapsed_time = start_time.elapsed();
+        if !(elapsed_time > frame_time) {
+            let remaining_time = frame_time - elapsed_time;
+            thread::sleep(remaining_time);
+        }
+    }
 }

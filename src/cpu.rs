@@ -7,21 +7,23 @@ const H_FLAG: u8 = 5; // Half carry flag
 const C_FLAG: u8 = 4; // Carry flag
 
 // 4.194304 MHz
-const CPU_FREQUENCY: f64 = 4194304.0;
+pub const CPU_FREQUENCY: f64 = 4194304.0;
 
 // #[derive(Default)]
 pub struct CPU {
     // 8 Bit registers
-    a: u8,   // Accumulator
-    b: u8,   // General purpose
-    c: u8,   // General purpose
-    d: u8,   // General purpose
-    e: u8,   // General purpose
-    f: u8,   // Flags
-    h: u8,   // General purpose
-    l: u8,   // General purpose
-    i: u8,   // Interrupt vector
-    r: u8,   // Memory refresh
+    a: u8, // Accumulator
+    b: u8, // General purpose
+    c: u8, // General purpose
+    d: u8, // General purpose
+    e: u8, // General purpose
+    f: u8, // Flags
+    h: u8, // General purpose
+    l: u8, // General purpose
+    i: u8, // Interrupt vector
+    r: u8, // Memory refresh
+
+    // exists in the z80, unused in the gameboy
     ixh: u8, // Index register
     ixl: u8, // Index register
     iyh: u8, // Index register
@@ -50,7 +52,7 @@ impl Default for CPU {
             ixl: 0,
             iyh: 0,
             iyl: 0,
-            pc: 0x0100,
+            pc: 0x0000,
             sp: 0xFFFE,
             hl: 0,
         }
@@ -107,11 +109,8 @@ pub fn dump_registers(cpu: &CPU) {
 }
 
 impl CPU {
-    pub fn step(&mut self, seconds: f64) {
-        let cycles = (seconds * CPU_FREQUENCY) as u64;
-        for _ in 0..cycles {
-            // fetch
-        }
+    pub fn increment_pc(&mut self) {
+        self.pc += 1;
     }
 
     pub fn get_a(&self) -> u8 {

@@ -1,26 +1,35 @@
 // // mod cpu;
 use crate::cpu;
+use crate::instruction;
 
 pub struct Gameboy {
-    cpu: cpu::CPU,
+    pub cpu: cpu::CPU,
     pub ram: [u8; 0xFFFF],
 }
 
-impl Default for Gameboy {
-    fn default() -> Self {
-        Gameboy {
-            cpu: cpu::CPU::default(),
-            ram: [0; 0xFFFF],
-        }
-    }
+pub fn create_gameboy() -> Gameboy {
+    let mut gb = Gameboy {
+        cpu: cpu::CPU::default(),
+        ram: [0; 0xFFFF],
+    };
+    gb.ram[0xfffe] = 0x00;
+    gb
 }
 
-impl Gameboy {
-    pub fn run(&mut self) {
-        // println!("gameboy: {:?}", self.ram[0xfffe]);
-    }
+fn get_opcode(gb: &mut Gameboy) -> u16 {
+    let opcode: u8 = gb.ram[gb.cpu.get_pc() as usize];
+    gb.cpu.increment_pc();
+    return opcode.into();
 }
 
-pub fn step(gb: &mut &Gameboy) {
+pub fn step(gb: &mut Gameboy) -> i64 {
+    let mut cycles = 0;
+    // fetch
+    let opcode = get_opcode(gb);
+    // cycles += gb.cpu.execute(opcode);
 
+    // execute
+    cycles += instruction::executeInstruction(gb, opcode);
+
+    return cycles;
 }

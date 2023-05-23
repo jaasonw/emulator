@@ -108,6 +108,10 @@ pub fn dump_registers(cpu: &CPU) {
     // println!("iyl: {:#06X}", cpu.get_iyl());
 }
 
+
+// the only instance of object-oriented programming you will see in this project
+// purely because it is more convenient to get and set combined registers with
+// .get_af() and .set_af() than it is to get and set the individual registers
 impl CPU {
     pub fn increment_pc(&mut self) {
         self.pc += 1;

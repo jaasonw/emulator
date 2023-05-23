@@ -846,7 +846,7 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         0xCB => {
             // PREFIX
             cycles += 4;
-            let opcode = gameboy::get_opcode(gb);
+            let opcode = gameboy::read_byte(gb);
             cycles += execute_prefixed(gb, opcode);
         }
         0xCC => {

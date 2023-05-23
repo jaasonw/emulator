@@ -16,16 +16,17 @@ pub fn create_gameboy() -> Gameboy {
     gb
 }
 
-pub fn get_opcode(gb: &mut Gameboy) -> u16 {
-    let opcode: u8 = gb.ram[gb.cpu.get_pc() as usize];
+// reads the byte at the current program counter
+pub fn read_byte(gb: &mut Gameboy) -> u16 {
+    let byte: u8 = gb.ram[gb.cpu.get_pc() as usize];
     gb.cpu.increment_pc();
-    return opcode.into();
+    return byte.into();
 }
 
 pub fn step(gb: &mut Gameboy) -> i64 {
     let mut cycles = 0;
     // fetch
-    let opcode = get_opcode(gb);
+    let opcode = read_byte(gb);
     cycles += 4;
     // decode
     cycles += 2;

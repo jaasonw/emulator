@@ -16,7 +16,7 @@ pub fn create_gameboy() -> Gameboy {
     gb
 }
 
-fn get_opcode(gb: &mut Gameboy) -> u16 {
+pub fn get_opcode(gb: &mut Gameboy) -> u16 {
     let opcode: u8 = gb.ram[gb.cpu.get_pc() as usize];
     gb.cpu.increment_pc();
     return opcode.into();
@@ -26,10 +26,11 @@ pub fn step(gb: &mut Gameboy) -> i64 {
     let mut cycles = 0;
     // fetch
     let opcode = get_opcode(gb);
-    // cycles += gb.cpu.execute(opcode);
-
+    cycles += 4;
+    // decode
+    cycles += 2;
     // execute
-    cycles += instruction::executeInstruction(gb, opcode);
+    cycles += instruction::execute_instruction(gb, opcode);
 
     return cycles;
 }

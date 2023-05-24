@@ -23,12 +23,6 @@ pub struct CPU {
     i: u8, // Interrupt vector
     r: u8, // Memory refresh
 
-    // exists in the z80, unused in the gameboy
-    ixh: u8, // Index register
-    ixl: u8, // Index register
-    iyh: u8, // Index register
-    iyl: u8, // Index register
-
     // 16 Bit Registers
     pc: u16, // Program counter
     sp: u16, // Stack pointer
@@ -47,10 +41,6 @@ impl Default for CPU {
             l: 0x4D,
             i: 0,
             r: 0,
-            ixh: 0,
-            ixl: 0,
-            iyh: 0,
-            iyl: 0,
             pc: 0x0000,
             sp: 0xFFFE,
         }
@@ -74,8 +64,6 @@ pub fn run() {
     cpu.set_bc(0x5678);
     cpu.set_de(0x9ABC);
     cpu.set_hl(0xDEF0);
-    cpu.set_ix(0x1234);
-    cpu.set_iy(0x5678);
 
     println!("CPU state after setting registers:");
     dump_registers(&cpu);
@@ -98,12 +86,6 @@ pub fn dump_registers(cpu: &CPU) {
     println!("hl: {:#06X}", cpu.get_hl());
     println!("pc: {:#06X}", cpu.get_pc());
     println!("sp: {:#06X}", cpu.get_sp());
-    // println!("ix: {:#06X}", cpu.get_ix());
-    // println!("iy: {:#06X}", cpu.get_iy());
-    // println!("ixh: {:#06X}", cpu.get_ixh());
-    // println!("ixl: {:#06X}", cpu.get_ixl());
-    // println!("iyh: {:#06X}", cpu.get_iyh());
-    // println!("iyl: {:#06X}", cpu.get_iyl());
 }
 
 // the only instance of object-oriented programming you will see in this project
@@ -186,22 +168,6 @@ impl CPU {
         self.r
     }
 
-    pub fn get_ixh(&self) -> u8 {
-        self.ixh
-    }
-
-    pub fn get_ixl(&self) -> u8 {
-        self.ixl
-    }
-
-    pub fn get_iyh(&self) -> u8 {
-        self.iyh
-    }
-
-    pub fn get_iyl(&self) -> u8 {
-        self.iyl
-    }
-
     pub fn get_pc(&self) -> u16 {
         self.pc
     }
@@ -224,14 +190,6 @@ impl CPU {
 
     pub fn get_de(&self) -> u16 {
         (self.d as u16) << 8 | self.e as u16
-    }
-
-    pub fn get_ix(&self) -> u16 {
-        (self.ixh as u16) << 8 | self.ixl as u16
-    }
-
-    pub fn get_iy(&self) -> u16 {
-        (self.iyh as u16) << 8 | self.iyl as u16
     }
 
     // setters
@@ -275,22 +233,6 @@ impl CPU {
         self.r = value;
     }
 
-    pub fn set_ixh(&mut self, value: u8) {
-        self.ixh = value;
-    }
-
-    pub fn set_ixl(&mut self, value: u8) {
-        self.ixl = value;
-    }
-
-    pub fn set_iyh(&mut self, value: u8) {
-        self.iyh = value;
-    }
-
-    pub fn set_iyl(&mut self, value: u8) {
-        self.iyl = value;
-    }
-
     pub fn set_pc(&mut self, value: u16) {
         self.pc = value;
     }
@@ -317,15 +259,5 @@ impl CPU {
     pub fn set_hl(&mut self, value: u16) {
         self.h = (value >> 8) as u8;
         self.l = value as u8;
-    }
-
-    pub fn set_ix(&mut self, value: u16) {
-        self.set_ixh((value >> 8) as u8);
-        self.set_ixl(value as u8);
-    }
-
-    pub fn set_iy(&mut self, value: u16) {
-        self.set_iyh((value >> 8) as u8);
-        self.set_iyl(value as u8);
     }
 }

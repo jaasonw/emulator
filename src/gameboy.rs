@@ -23,6 +23,14 @@ pub fn read_byte(gb: &mut Gameboy) -> u16 {
     return byte.into();
 }
 
+pub fn read_short(gb: &mut Gameboy) -> u16 {
+    let short: u16 = (gb.ram[(gb.cpu.get_pc() + 1) as usize] as u16) << 8
+        | (gb.ram[gb.cpu.get_pc() as usize] as u16);
+    gb.cpu.increment_pc();
+    gb.cpu.increment_pc();
+    return short;
+}
+
 pub fn step_cpu(gb: &mut Gameboy) -> i64 {
     let mut cycles = 0;
     // fetch

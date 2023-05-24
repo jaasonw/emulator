@@ -32,7 +32,6 @@ pub struct CPU {
     // 16 Bit Registers
     pc: u16, // Program counter
     sp: u16, // Stack pointer
-    hl: u16, // General purpose
 }
 
 impl Default for CPU {
@@ -54,7 +53,6 @@ impl Default for CPU {
             iyl: 0,
             pc: 0x0000,
             sp: 0xFFFE,
-            hl: 0,
         }
     }
 }
@@ -108,13 +106,44 @@ pub fn dump_registers(cpu: &CPU) {
     // println!("iyl: {:#06X}", cpu.get_iyl());
 }
 
-
 // the only instance of object-oriented programming you will see in this project
 // purely because it is more convenient to get and set combined registers with
 // .get_af() and .set_af() than it is to get and set the individual registers
 impl CPU {
     pub fn increment_pc(&mut self) {
         self.pc += 1;
+    }
+
+    pub fn set_z_flag(&mut self, value: bool) {
+        self.f = (self.f & !(1 << Z_FLAG)) | ((value as u8) << Z_FLAG);
+    }
+
+    pub fn set_n_flag(&mut self, value: bool) {
+        self.f = (self.f & !(1 << N_FLAG)) | ((value as u8) << N_FLAG);
+    }
+
+    pub fn set_h_flag(&mut self, value: bool) {
+        self.f = (self.f & !(1 << H_FLAG)) | ((value as u8) << H_FLAG);
+    }
+
+    pub fn set_c_flag(&mut self, value: bool) {
+        self.f = (self.f & !(1 << C_FLAG)) | ((value as u8) << C_FLAG);
+    }
+
+    pub fn get_z_flag(&self) -> bool {
+        (self.f & (1 << Z_FLAG)) != 0
+    }
+
+    pub fn get_n_flag(&self) -> bool {
+        (self.f & (1 << N_FLAG)) != 0
+    }
+
+    pub fn get_h_flag(&self) -> bool {
+        (self.f & (1 << H_FLAG)) != 0
+    }
+
+    pub fn get_c_flag(&self) -> bool {
+        (self.f & (1 << C_FLAG)) != 0
     }
 
     pub fn get_a(&self) -> u8 {
@@ -182,7 +211,7 @@ impl CPU {
     }
 
     pub fn get_hl(&self) -> u16 {
-        self.hl
+        (self.h as u16) << 8 | self.l as u16
     }
 
     pub fn get_af(&self) -> u16 {
@@ -286,7 +315,8 @@ impl CPU {
     }
 
     pub fn set_hl(&mut self, value: u16) {
-        self.hl = value;
+        self.h = (value >> 8) as u8;
+        self.l = value as u8;
     }
 
     pub fn set_ix(&mut self, value: u16) {

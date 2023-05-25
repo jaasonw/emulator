@@ -27,6 +27,8 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x02 => {
             // LD BC A
+            let addr = gb.cpu.get_bc();
+            gb.ram[addr as usize] = gb.cpu.get_a();
             cycles += 8;
         }
         0x03 => {
@@ -46,6 +48,7 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x06 => {
             // LD B n8
+            load_immediate_8bit(gb, "b");
             cycles += 8;
         }
         0x07 => {
@@ -80,6 +83,7 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x0E => {
             // LD C n8
+            load_immediate_8bit(gb, "c");
             cycles += 8;
         }
         0x0F => {
@@ -96,6 +100,8 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x12 => {
             // LD DE A
+            let addr = gb.cpu.get_de();
+            gb.ram[addr as usize] = gb.cpu.get_a();
             cycles += 8;
         }
         0x13 => {
@@ -115,6 +121,7 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x16 => {
             // LD D n8
+            load_immediate_8bit(gb, "d");
             cycles += 8;
         }
         0x17 => {
@@ -153,6 +160,7 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x1E => {
             // LD E n8
+            load_immediate_8bit(gb, "e");
             cycles += 8;
         }
         0x1F => {
@@ -198,6 +206,7 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x26 => {
             // LD H n8
+            load_immediate_8bit(gb, "h");
             cycles += 8;
         }
         0x27 => {
@@ -221,6 +230,9 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         0x2A => {
             // LD A HL+
             // Load the contents of memory specified by register pair HL into register A, and then increment the contents of HL.
+            let addr = gb.cpu.get_hl();
+            gb.cpu.set_a(gb.ram[addr as usize]);
+            increment_16bit(gb, "hl");
             cycles += 8;
         }
         0x2B => {
@@ -240,6 +252,7 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x2E => {
             // LD L n8
+            load_immediate_8bit(gb, "l");
             cycles += 8;
         }
         0x2F => {
@@ -289,6 +302,10 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x36 => {
             // LD HL n8
+            // Store the contents of 8-bit immediate operand d8 in the memory location specified by register pair HL.
+            let value = gameboy::read_byte(gb) as u8;
+            let hl = gb.cpu.get_hl();
+            gb.ram[hl as usize] = value;
             cycles += 12;
         }
         0x37 => {
@@ -311,6 +328,10 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x3A => {
             // LD A HL-
+            // Load the contents of memory specified by register pair HL into register A, and then decrement the contents of HL.
+            let addr = gb.cpu.get_hl();
+            gb.cpu.set_a(gb.ram[addr as usize]);
+            decrement_16bit(gb, "hl");
             cycles += 8;
         }
         0x3B => {
@@ -330,6 +351,7 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x3E => {
             // LD A n8
+            load_immediate_8bit(gb, "a");
             cycles += 8;
         }
         0x3F => {
@@ -338,218 +360,297 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x40 => {
             // LD B B
+            load_register_8bit(gb, "b", "b");
             cycles += 4;
         }
         0x41 => {
             // LD B C
+            load_register_8bit(gb, "b", "c");
             cycles += 4;
         }
         0x42 => {
             // LD B D
+            load_register_8bit(gb, "b", "d");
             cycles += 4;
         }
         0x43 => {
             // LD B E
+            load_register_8bit(gb, "b", "e");
             cycles += 4;
         }
         0x44 => {
             // LD B H
+            load_register_8bit(gb, "b", "h");
             cycles += 4;
         }
         0x45 => {
             // LD B L
+            load_register_8bit(gb, "b", "l");
             cycles += 4;
         }
         0x46 => {
             // LD B HL
+            let addr = gb.cpu.get_hl();
+            let value = gb.ram[addr as usize];
+            load_8bit(gb, "b", value);
             cycles += 8;
         }
         0x47 => {
             // LD B A
+            load_register_8bit(gb, "b", "a");
             cycles += 4;
         }
         0x48 => {
             // LD C B
+            load_register_8bit(gb, "c", "b");
             cycles += 4;
         }
         0x49 => {
             // LD C C
+            load_register_8bit(gb, "c", "c");
             cycles += 4;
         }
         0x4A => {
             // LD C D
+            load_register_8bit(gb, "c", "d");
             cycles += 4;
         }
         0x4B => {
             // LD C E
+            load_register_8bit(gb, "c", "e");
             cycles += 4;
         }
         0x4C => {
             // LD C H
+            load_register_8bit(gb, "c", "h");
             cycles += 4;
         }
         0x4D => {
             // LD C L
+            load_register_8bit(gb, "c", "l");
             cycles += 4;
         }
         0x4E => {
             // LD C HL
+            let addr = gb.cpu.get_hl();
+            let value = gb.ram[addr as usize];
+            load_8bit(gb, "c", value);
             cycles += 8;
         }
         0x4F => {
             // LD C A
+            load_register_8bit(gb, "c", "a");
             cycles += 4;
         }
         0x50 => {
             // LD D B
+            load_register_8bit(gb, "d", "b");
             cycles += 4;
         }
         0x51 => {
             // LD D C
+            load_register_8bit(gb, "d", "c");
             cycles += 4;
         }
         0x52 => {
             // LD D D
+            load_register_8bit(gb, "d", "d");
             cycles += 4;
         }
         0x53 => {
             // LD D E
+            load_register_8bit(gb, "d", "e");
             cycles += 4;
         }
         0x54 => {
             // LD D H
+            load_register_8bit(gb, "d", "h");
             cycles += 4;
         }
         0x55 => {
             // LD D L
+            load_register_8bit(gb, "d", "l");
             cycles += 4;
         }
         0x56 => {
             // LD D HL
+            let addr = gb.cpu.get_hl();
+            let value = gb.ram[addr as usize];
+            load_8bit(gb, "d", value);
             cycles += 8;
         }
         0x57 => {
             // LD D A
+            load_register_8bit(gb, "d", "a");
             cycles += 4;
         }
         0x58 => {
             // LD E B
+            load_register_8bit(gb, "e", "b");
             cycles += 4;
         }
         0x59 => {
             // LD E C
+            load_register_8bit(gb, "e", "c");
             cycles += 4;
         }
         0x5A => {
             // LD E D
+            load_register_8bit(gb, "e", "d");
             cycles += 4;
         }
         0x5B => {
             // LD E E
+            load_register_8bit(gb, "e", "e");
             cycles += 4;
         }
         0x5C => {
             // LD E H
+            load_register_8bit(gb, "e", "h");
             cycles += 4;
         }
         0x5D => {
             // LD E L
+            load_register_8bit(gb, "e", "l");
             cycles += 4;
         }
         0x5E => {
             // LD E HL
+            let addr = gb.cpu.get_hl();
+            let value = gb.ram[addr as usize];
+            load_8bit(gb, "e", value);
             cycles += 8;
         }
         0x5F => {
             // LD E A
+            load_register_8bit(gb, "e", "a");
             cycles += 4;
         }
         0x60 => {
             // LD H B
+            load_register_8bit(gb, "h", "b");
             cycles += 4;
         }
         0x61 => {
             // LD H C
+            load_register_8bit(gb, "h", "c");
             cycles += 4;
         }
         0x62 => {
             // LD H D
+            load_register_8bit(gb, "h", "d");
             cycles += 4;
         }
         0x63 => {
             // LD H E
+            load_register_8bit(gb, "h", "e");
             cycles += 4;
         }
         0x64 => {
             // LD H H
+            load_register_8bit(gb, "h", "h");
             cycles += 4;
         }
         0x65 => {
             // LD H L
+            load_register_8bit(gb, "h", "l");
             cycles += 4;
         }
         0x66 => {
             // LD H HL
+            let addr = gb.cpu.get_hl();
+            let value = gb.ram[addr as usize];
+            load_8bit(gb, "h", value);
             cycles += 8;
         }
         0x67 => {
             // LD H A
+            load_register_8bit(gb, "h", "a");
             cycles += 4;
         }
         0x68 => {
             // LD L B
+            load_register_8bit(gb, "l", "b");
             cycles += 4;
         }
         0x69 => {
             // LD L C
+            load_register_8bit(gb, "l", "c");
             cycles += 4;
         }
         0x6A => {
             // LD L D
+            load_register_8bit(gb, "l", "d");
             cycles += 4;
         }
         0x6B => {
             // LD L E
+            load_register_8bit(gb, "l", "e");
             cycles += 4;
         }
         0x6C => {
             // LD L H
+            load_register_8bit(gb, "l", "h");
             cycles += 4;
         }
         0x6D => {
             // LD L L
+            load_register_8bit(gb, "l", "l");
             cycles += 4;
         }
         0x6E => {
             // LD L HL
+            let addr = gb.cpu.get_hl();
+            let value = gb.ram[addr as usize];
+            load_8bit(gb, "l", value);
             cycles += 8;
         }
         0x6F => {
             // LD L A
+            load_register_8bit(gb, "l", "a");
             cycles += 4;
         }
         0x70 => {
             // LD HL B
+            // Store the contents of register B in the memory location specified by register pair HL
+            let addr = gb.cpu.get_hl();
+            let value = gb.cpu.get_b();
+            gb.ram[addr as usize] = value;
             cycles += 8;
         }
         0x71 => {
             // LD HL C
+            let addr = gb.cpu.get_hl();
+            let value = gb.cpu.get_c();
+            gb.ram[addr as usize] = value;
             cycles += 8;
         }
         0x72 => {
             // LD HL D
+            let addr = gb.cpu.get_hl();
+            let value = gb.cpu.get_d();
+            gb.ram[addr as usize] = value;
             cycles += 8;
         }
         0x73 => {
             // LD HL E
+            let addr = gb.cpu.get_hl();
+            let value = gb.cpu.get_e();
+            gb.ram[addr as usize] = value;
             cycles += 8;
         }
         0x74 => {
             // LD HL H
+            let addr = gb.cpu.get_hl();
+            let value = gb.cpu.get_h();
+            gb.ram[addr as usize] = value;
             cycles += 8;
         }
         0x75 => {
             // LD HL L
+            let addr = gb.cpu.get_hl();
+            let value = gb.cpu.get_l();
+            gb.ram[addr as usize] = value;
             cycles += 8;
         }
         0x76 => {
@@ -558,38 +659,51 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x77 => {
             // LD HL A
+            let addr = gb.cpu.get_hl();
+            let value = gb.cpu.get_a();
+            gb.ram[addr as usize] = value;
             cycles += 8;
         }
         0x78 => {
             // LD A B
+            load_register_8bit(gb, "a", "b");
             cycles += 4;
         }
         0x79 => {
             // LD A C
+            load_register_8bit(gb, "a", "c");
             cycles += 4;
         }
         0x7A => {
             // LD A D
+            load_register_8bit(gb, "a", "d");
             cycles += 4;
         }
         0x7B => {
             // LD A E
+            load_register_8bit(gb, "a", "e");
             cycles += 4;
         }
         0x7C => {
             // LD A H
+            load_register_8bit(gb, "a", "h");
             cycles += 4;
         }
         0x7D => {
             // LD A L
+            load_register_8bit(gb, "a", "l");
             cycles += 4;
         }
         0x7E => {
             // LD A HL
+            let addr = gb.cpu.get_hl();
+            let value = gb.ram[addr as usize];
+            load_8bit(gb, "a", value);
             cycles += 8;
         }
         0x7F => {
             // LD A A
+            load_register_8bit(gb, "a", "a");
             cycles += 4;
         }
         0x80 => {
@@ -786,7 +900,8 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0xAF => {
             // XOR A
-            gb.cpu.set_a(0);
+            // gb.cpu.set_a(0);
+            xor(gb, "a");
             cycles += 4;
         }
         0xB0 => {
@@ -1029,6 +1144,10 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0xE2 => {
             // LD C A
+            // Load to the address specified by the 8-bit C register, data from the 8-bit A register.
+            let addr = gb.cpu.get_c();
+            let data = gb.cpu.get_a();
+            gb.ram[addr as usize] = data;
             cycles += 8;
         }
         0xE3 => {
@@ -1061,6 +1180,10 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0xEA => {
             // LD a16 A
+            // Store the contents of register A in the internal RAM or register specified by the 16-bit immediate operand a16.
+            // Load to the absolute address specified by the 16-bit operand nn, data from the 8-bit A register.
+            let a16 = gameboy::read_short(gb);
+            gb.ram[a16 as usize] = gb.cpu.get_a();
             cycles += 16;
         }
         0xEB => {
@@ -1093,6 +1216,10 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0xF2 => {
             // LD A C
+            // Load to the 8-bit A register, data from the address specified by the 8-bit C register.
+            let addr = gb.cpu.get_c();
+            let data = gb.ram[addr as usize];
+            gb.cpu.set_a(data);
             cycles += 8;
         }
         0xF3 => {
@@ -1125,6 +1252,9 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0xFA => {
             // LD A a16
+            // Load to the 8-bit A register, data from the absolute address specified by the 16-bit operand nn.
+            let a16 = gameboy::read_short(gb);
+            gb.cpu.set_a(gb.ram[a16 as usize]);
             cycles += 16;
         }
         0xFB => {
@@ -2336,285 +2466,73 @@ fn get_bit_at_position_16bit(n: u32, num: u16) -> bool {
 
 // Load functions
 fn load_8bit(gb: &mut gameboy::Gameboy, register: &str, value: u8) {
-    match register {
-        "a" => gb.cpu.set_a(value),
-        "b" => gb.cpu.set_b(value),
-        "c" => gb.cpu.set_c(value),
-        "d" => gb.cpu.set_d(value),
-        "e" => gb.cpu.set_e(value),
-        "h" => gb.cpu.set_h(value),
-        "l" => gb.cpu.set_l(value),
-        "i" => gb.cpu.set_i(value),
-        "r" => gb.cpu.set_r(value),
-        _ => panic!("Invalid register"),
-    }
+    gb.cpu.set_register_8bit(register, value);
 }
 
 fn load_16bit(gb: &mut gameboy::Gameboy, register: &str, value: u16) {
-    match register {
-        "af" => gb.cpu.set_af(value),
-        "bc" => gb.cpu.set_bc(value),
-        "de" => gb.cpu.set_de(value),
-        "hl" => gb.cpu.set_hl(value),
-        "sp" => gb.cpu.set_sp(value),
-        _ => panic!("Invalid register"),
-    }
+    gb.cpu.set_register_16bit(register, value);
+}
+
+fn load_immediate_8bit(gb: &mut gameboy::Gameboy, register: &str) {
+    let value = u8::try_from(gameboy::read_byte(gb)).unwrap();
+    load_8bit(gb, register, value);
+}
+
+fn load_immediate_16bit(gb: &mut gameboy::Gameboy, register: &str) {
+    let value = u16::try_from(gameboy::read_short(gb)).unwrap();
+    load_16bit(gb, register, value);
+}
+
+fn load_register_8bit(gb: &mut gameboy::Gameboy, dest: &str, src: &str) {
+    let src_value = gb.cpu.get_register_8bit(src);
+    load_8bit(gb, dest, src_value);
+}
+
+fn load_register_16bit(gb: &mut gameboy::Gameboy, dest: &str, src: &str) {
+    let src_value = gb.cpu.get_register_16bit(src);
+    load_16bit(gb, dest, src_value);
 }
 
 // ALU functions
 fn increment_8bit(gb: &mut gameboy::Gameboy, register: &str) -> u8 {
-    match register {
-        "a" => {
-            let a = gb.cpu.get_a();
-            let result = a.wrapping_add(1);
-            gb.cpu.set_a(result);
-            return result;
-        }
-        "b" => {
-            let b = gb.cpu.get_b();
-            let result = b.wrapping_add(1);
-            gb.cpu.set_b(result);
-            return result;
-        }
-        "c" => {
-            let c = gb.cpu.get_c();
-            let result = c.wrapping_add(1);
-            gb.cpu.set_c(result);
-            return result;
-        }
-        "d" => {
-            let d = gb.cpu.get_d();
-            let result = d.wrapping_add(1);
-            gb.cpu.set_d(result);
-            return result;
-        }
-        "e" => {
-            let e = gb.cpu.get_e();
-            let result = e.wrapping_add(1);
-            gb.cpu.set_e(result);
-            return result;
-        }
-        "h" => {
-            let h = gb.cpu.get_h();
-            let result = h.wrapping_add(1);
-            gb.cpu.set_h(result);
-            return result;
-        }
-        "l" => {
-            let l = gb.cpu.get_l();
-            let result = l.wrapping_add(1);
-            gb.cpu.set_l(result);
-            return result;
-        }
-        _ => {
-            panic!("Invalid register");
-        }
-    }
+    let current = gb.cpu.get_register_8bit(register);
+    let result = current.wrapping_add(1);
+    load_8bit(gb, register, result);
+    return result;
 }
 
 fn decrement_8bit(gb: &mut gameboy::Gameboy, register: &str) -> u8 {
-    match register {
-        "a" => {
-            let a = gb.cpu.get_a();
-            let result = a.wrapping_sub(1);
-            gb.cpu.set_a(result);
-            return result;
-        }
-        "b" => {
-            let b = gb.cpu.get_b();
-            let result = b.wrapping_sub(1);
-            gb.cpu.set_b(result);
-            return result;
-        }
-        "c" => {
-            let c = gb.cpu.get_c();
-            let result = c.wrapping_sub(1);
-            gb.cpu.set_c(result);
-            return result;
-        }
-        "d" => {
-            let d = gb.cpu.get_d();
-            let result = d.wrapping_sub(1);
-            gb.cpu.set_d(result);
-            return result;
-        }
-        "e" => {
-            let e = gb.cpu.get_e();
-            let result = e.wrapping_sub(1);
-            gb.cpu.set_e(result);
-            return result;
-        }
-        "h" => {
-            let h = gb.cpu.get_h();
-            let result = h.wrapping_sub(1);
-            gb.cpu.set_h(result);
-            return result;
-        }
-        "l" => {
-            let l = gb.cpu.get_l();
-            let result = l.wrapping_sub(1);
-            gb.cpu.set_l(result);
-            return result;
-        }
-        _ => {
-            panic!("Invalid register");
-        }
-    }
+    let current = gb.cpu.get_register_8bit(register);
+    let result = current.wrapping_sub(1);
+    load_8bit(gb, register, result);
+    return result;
 }
 
 fn xor(gb: &mut gameboy::Gameboy, register: &str) -> u8 {
-    match register {
-        "a" => {
-            let a = gb.cpu.get_a();
-            let result = a ^ a;
-            if result == 0 {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
-            gb.cpu.set_a(result);
-            return result;
-        }
-        "b" => {
-            let a = gb.cpu.get_a();
-            let b = gb.cpu.get_b();
-            let result = a ^ b;
-            if result == 0 {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
-            gb.cpu.set_b(result);
-            return result;
-        }
-        "c" => {
-            let a = gb.cpu.get_a();
-            let c = gb.cpu.get_c();
-            let result = a ^ c;
-            if result == 0 {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
-            gb.cpu.set_c(result);
-            return result;
-        }
-        "d" => {
-            let a = gb.cpu.get_a();
-            let d = gb.cpu.get_d();
-            let result = a ^ d;
-            if result == 0 {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
-            gb.cpu.set_d(result);
-            return result;
-        }
-        "e" => {
-            let a = gb.cpu.get_a();
-            let e = gb.cpu.get_e();
-            let result = a ^ e;
-            if result == 0 {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
-            gb.cpu.set_e(result);
-            return result;
-        }
-        "h" => {
-            let a = gb.cpu.get_a();
-            let h = gb.cpu.get_h();
-            let result = a ^ h;
-            if result == 0 {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
-            gb.cpu.set_h(result);
-            return result;
-        }
-        "l" => {
-            let a = gb.cpu.get_a();
-            let l = gb.cpu.get_l();
-            let result = a ^ l;
-            if result == 0 {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
-            gb.cpu.set_l(result);
-            return result;
-        }
-        _ => {
-            panic!("Invalid register");
-        }
+    let a = gb.cpu.get_a();
+    let value = gb.cpu.get_register_8bit(register);
+    let result = a ^ value;
+    if result == 0 {
+        gb.cpu.set_z_flag(true);
+    } else {
+        gb.cpu.set_z_flag(false);
     }
+    gb.cpu.set_register_8bit(register, result);
+    return result;
 }
 
 fn increment_16bit(gb: &mut gameboy::Gameboy, register: &str) -> u16 {
-    match register {
-        "bc" => {
-            let bc = gb.cpu.get_bc();
-            let result = bc.wrapping_add(1);
-            gb.cpu.set_bc(result);
-            return result;
-        }
-        "de" => {
-            let de = gb.cpu.get_de();
-            let result = de.wrapping_add(1);
-            gb.cpu.set_de(result);
-            return result;
-        }
-        "hl" => {
-            let hl = gb.cpu.get_hl();
-            let result = hl.wrapping_add(1);
-            gb.cpu.set_hl(result);
-            return result;
-        }
-        "sp" => {
-            let sp = gb.cpu.get_sp();
-            let result = sp.wrapping_add(1);
-            gb.cpu.set_sp(result);
-            return result;
-        }
-        _ => {
-            panic!("Invalid register");
-        }
-    }
+    let current = gb.cpu.get_register_16bit(register);
+    let result = current.wrapping_add(1);
+    load_16bit(gb, register, result);
+    return result;
 }
 
 fn decrement_16bit(gb: &mut gameboy::Gameboy, register: &str) -> u16 {
-    match register {
-        "bc" => {
-            let bc = gb.cpu.get_bc();
-            let result = bc.wrapping_sub(1);
-            gb.cpu.set_bc(result);
-            return result;
-        }
-        "de" => {
-            let de = gb.cpu.get_de();
-            let result = de.wrapping_sub(1);
-            gb.cpu.set_de(result);
-            return result;
-        }
-        "hl" => {
-            let hl = gb.cpu.get_hl();
-            let result = hl.wrapping_sub(1);
-            gb.cpu.set_hl(result);
-            return result;
-        }
-        "sp" => {
-            let sp = gb.cpu.get_sp();
-            let result = sp.wrapping_sub(1);
-            gb.cpu.set_sp(result);
-            return result;
-        }
-        _ => {
-            panic!("Invalid register");
-        }
-    }
+    let current = gb.cpu.get_register_16bit(register);
+    let result = current.wrapping_sub(1);
+    load_16bit(gb, register, result);
+    return result;
 }
 
 mod tests {
@@ -2710,5 +2628,37 @@ mod tests {
         let val: u8 = 0xFE;
         let bit = get_bit_at_position_8bit(7, val) as u8;
         assert_eq!(bit, 0);
+    }
+
+    #[test]
+    fn test_increment_8bit() {
+        let mut gb = gameboy::create_gameboy();
+        gb.cpu.set_a(0x00);
+        increment_8bit(&mut gb, "a");
+        assert_eq!(gb.cpu.get_a(), 0x01);
+    }
+
+    #[test]
+    fn test_decrement_8bit() {
+        let mut gb = gameboy::create_gameboy();
+        gb.cpu.set_a(0x01);
+        decrement_8bit(&mut gb, "a");
+        assert_eq!(gb.cpu.get_a(), 0x00);
+    }
+
+    #[test]
+    fn test_increment_16bit() {
+        let mut gb = gameboy::create_gameboy();
+        gb.cpu.set_bc(0x0000);
+        increment_16bit(&mut gb, "bc");
+        assert_eq!(gb.cpu.get_bc(), 0x0001);
+    }
+
+    #[test]
+    fn test_decrement_16bit() {
+        let mut gb = gameboy::create_gameboy();
+        gb.cpu.set_bc(0x0001);
+        decrement_16bit(&mut gb, "bc");
+        assert_eq!(gb.cpu.get_bc(), 0x0000);
     }
 }

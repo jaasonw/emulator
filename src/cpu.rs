@@ -267,6 +267,53 @@ impl CPU {
         self.h = (value >> 8) as u8;
         self.l = value as u8;
     }
+
+    pub fn get_register_8bit(&mut self, register: &str) -> u8 {
+        match register {
+            "a" => self.a,
+            "b" => self.b,
+            "c" => self.c,
+            "d" => self.d,
+            "e" => self.e,
+            "f" => self.f,
+            "h" => self.h,
+            "l" => self.l,
+            _ => panic!("Invalid register"),
+        }
+    }
+    pub fn get_register_16bit(&mut self, register: &str) -> u16 {
+        match register {
+            "af" => self.get_af(),
+            "bc" => self.get_bc(),
+            "de" => self.get_de(),
+            "hl" => self.get_hl(),
+            _ => panic!("Invalid register"),
+        }
+    }
+
+    pub fn set_register_8bit(&mut self, register: &str, value: u8) {
+        match register {
+            "a" => self.a = value,
+            "b" => self.b = value,
+            "c" => self.c = value,
+            "d" => self.d = value,
+            "e" => self.e = value,
+            "f" => self.f = value,
+            "h" => self.h = value,
+            "l" => self.l = value,
+            _ => panic!("Invalid register"),
+        }
+    }
+
+    pub fn set_register_16bit(&mut self, register: &str, value: u16) {
+        match register {
+            "af" => self.set_af(value),
+            "bc" => self.set_bc(value),
+            "de" => self.set_de(value),
+            "hl" => self.set_hl(value),
+            _ => panic!("Invalid register"),
+        }
+    }
 }
 
 mod tests {

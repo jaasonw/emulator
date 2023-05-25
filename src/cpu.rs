@@ -88,6 +88,13 @@ pub fn dump_registers(cpu: &CPU) {
     println!("sp: {:#06X}", cpu.get_sp());
 }
 
+pub fn print_flags(cpu: &CPU) {
+    println!("z: {}", cpu.get_z_flag());
+    println!("n: {}", cpu.get_n_flag());
+    println!("h: {}", cpu.get_h_flag());
+    println!("c: {}", cpu.get_c_flag());
+}
+
 // the only instance of object-oriented programming you will see in this project
 // purely because it is more convenient to get and set combined registers with
 // .get_af() and .set_af() than it is to get and set the individual registers
@@ -259,5 +266,162 @@ impl CPU {
     pub fn set_hl(&mut self, value: u16) {
         self.h = (value >> 8) as u8;
         self.l = value as u8;
+    }
+}
+
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_z_flag() {
+        let mut cpu = CPU::default();
+        cpu.set_z_flag(true);
+        assert_eq!(cpu.get_z_flag(), true);
+        cpu.set_z_flag(false);
+        assert_eq!(cpu.get_z_flag(), false);
+    }
+    #[test]
+    fn test_n_flag() {
+        let mut cpu = CPU::default();
+        cpu.set_n_flag(true);
+        assert_eq!(cpu.get_n_flag(), true);
+        cpu.set_n_flag(false);
+        assert_eq!(cpu.get_n_flag(), false);
+    }
+    #[test]
+    fn test_h_flag() {
+        let mut cpu = CPU::default();
+        cpu.set_h_flag(true);
+        assert_eq!(cpu.get_h_flag(), true);
+        cpu.set_h_flag(false);
+        assert_eq!(cpu.get_h_flag(), false);
+    }
+    #[test]
+    fn test_c_flag() {
+        let mut cpu = CPU::default();
+        cpu.set_c_flag(true);
+        assert_eq!(cpu.get_c_flag(), true);
+        cpu.set_c_flag(false);
+        assert_eq!(cpu.get_c_flag(), false);
+    }
+    #[test]
+    fn test_a_register() {
+        let mut cpu = CPU::default();
+        cpu.set_a(0x12);
+        assert_eq!(cpu.get_a(), 0x12);
+    }
+
+    #[test]
+    fn test_b_register() {
+        let mut cpu = CPU::default();
+        cpu.set_b(0x12);
+        assert_eq!(cpu.get_b(), 0x12);
+    }
+
+    #[test]
+    fn test_c_register() {
+        let mut cpu = CPU::default();
+        cpu.set_c(0x12);
+        assert_eq!(cpu.get_c(), 0x12);
+    }
+
+    #[test]
+    fn test_d_register() {
+        let mut cpu = CPU::default();
+        cpu.set_d(0x12);
+        assert_eq!(cpu.get_d(), 0x12);
+    }
+
+    #[test]
+    fn test_e_register() {
+        let mut cpu = CPU::default();
+        cpu.set_e(0x12);
+        assert_eq!(cpu.get_e(), 0x12);
+    }
+
+    #[test]
+
+    fn test_f_register() {
+        let mut cpu = CPU::default();
+        cpu.set_f(0x12);
+        assert_eq!(cpu.get_f(), 0x12);
+    }
+
+    #[test]
+    fn test_h_register() {
+        let mut cpu = CPU::default();
+        cpu.set_h(0x12);
+        assert_eq!(cpu.get_h(), 0x12);
+    }
+
+    #[test]
+    fn test_l_register() {
+        let mut cpu = CPU::default();
+        cpu.set_l(0x12);
+        assert_eq!(cpu.get_l(), 0x12);
+    }
+
+    #[test]
+    fn test_i_register() {
+        let mut cpu = CPU::default();
+        cpu.set_i(0x12);
+        assert_eq!(cpu.get_i(), 0x12);
+    }
+
+    #[test]
+    fn test_r_register() {
+        let mut cpu = CPU::default();
+        cpu.set_r(0x12);
+        assert_eq!(cpu.get_r(), 0x12);
+    }
+
+    #[test]
+    fn test_pc_register() {
+        let mut cpu = CPU::default();
+        cpu.set_pc(0x1234);
+        assert_eq!(cpu.get_pc(), 0x1234);
+    }
+
+    #[test]
+    fn test_sp_register() {
+        let mut cpu = CPU::default();
+        cpu.set_sp(0x1234);
+        assert_eq!(cpu.get_sp(), 0x1234);
+    }
+
+    #[test]
+    fn test_af_register() {
+        let mut cpu = CPU::default();
+        cpu.set_af(0x1234);
+        assert_eq!(cpu.get_a(), 0x12);
+        assert_eq!(cpu.get_f(), 0x34);
+        assert_eq!(cpu.get_af(), 0x1234);
+    }
+
+    #[test]
+    fn test_bc_register() {
+        let mut cpu = CPU::default();
+        cpu.set_bc(0x1234);
+        assert_eq!(cpu.get_b(), 0x12);
+        assert_eq!(cpu.get_c(), 0x34);
+        assert_eq!(cpu.get_bc(), 0x1234);
+    }
+
+    #[test]
+    fn test_de_register() {
+        let mut cpu = CPU::default();
+        cpu.set_de(0x1234);
+        assert_eq!(cpu.get_d(), 0x12);
+        assert_eq!(cpu.get_e(), 0x34);
+        assert_eq!(cpu.get_de(), 0x1234);
+    }
+
+    #[test]
+    fn test_hl_register() {
+        let mut cpu = CPU::default();
+        cpu.set_hl(0x1234);
+        assert_eq!(cpu.get_h(), 0x12);
+        assert_eq!(cpu.get_l(), 0x34);
+        assert_eq!(cpu.get_hl(), 0x1234);
     }
 }

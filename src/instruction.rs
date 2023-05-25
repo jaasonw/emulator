@@ -1,290 +1,7 @@
-use crate::{cpu, gameboy};
-
-// bit and shift functions
-fn get_bit_at_position_8bit(n: u32, num: u8) -> bool {
-    return (num & (1 << n)) != 0;
-}
-
-fn get_bit_at_position_16bit(n: u32, num: u16) -> bool {
-    return (num & (1 << n)) != 0;
-}
-
-// Load functions
-fn load_8bit(gb: &mut gameboy::Gameboy, register: &str, value: u8) {
-    match register {
-        "a" => gb.cpu.set_a(value),
-        "b" => gb.cpu.set_b(value),
-        "c" => gb.cpu.set_c(value),
-        "d" => gb.cpu.set_d(value),
-        "e" => gb.cpu.set_e(value),
-        "h" => gb.cpu.set_h(value),
-        "l" => gb.cpu.set_l(value),
-        "i" => gb.cpu.set_i(value),
-        "r" => gb.cpu.set_r(value),
-        _ => panic!("Invalid register"),
-    }
-}
-
-fn load_16bit(gb: &mut gameboy::Gameboy, register: &str, value: u16) {
-    match register {
-        "af" => gb.cpu.set_af(value),
-        "bc" => gb.cpu.set_bc(value),
-        "de" => gb.cpu.set_de(value),
-        "hl" => gb.cpu.set_hl(value),
-        "sp" => gb.cpu.set_sp(value),
-        _ => panic!("Invalid register"),
-    }
-}
-
-// ALU functions
-fn increment_8bit(gb: &mut gameboy::Gameboy, register: &str) -> u8 {
-    match register {
-        "a" => {
-            let a = gb.cpu.get_a();
-            let result = a.wrapping_add(1);
-            gb.cpu.set_a(result);
-            return result;
-        }
-        "b" => {
-            let b = gb.cpu.get_b();
-            let result = b.wrapping_add(1);
-            gb.cpu.set_b(result);
-            return result;
-        }
-        "c" => {
-            let c = gb.cpu.get_c();
-            let result = c.wrapping_add(1);
-            gb.cpu.set_c(result);
-            return result;
-        }
-        "d" => {
-            let d = gb.cpu.get_d();
-            let result = d.wrapping_add(1);
-            gb.cpu.set_d(result);
-            return result;
-        }
-        "e" => {
-            let e = gb.cpu.get_e();
-            let result = e.wrapping_add(1);
-            gb.cpu.set_e(result);
-            return result;
-        }
-        "h" => {
-            let h = gb.cpu.get_h();
-            let result = h.wrapping_add(1);
-            gb.cpu.set_h(result);
-            return result;
-        }
-        "l" => {
-            let l = gb.cpu.get_l();
-            let result = l.wrapping_add(1);
-            gb.cpu.set_l(result);
-            return result;
-        }
-        _ => {
-            panic!("Invalid register");
-        }
-    }
-}
-
-fn decrement_8bit(gb: &mut gameboy::Gameboy, register: &str) -> u8 {
-    match register {
-        "a" => {
-            let a = gb.cpu.get_a();
-            let result = a.wrapping_sub(1);
-            gb.cpu.set_a(result);
-            return result;
-        }
-        "b" => {
-            let b = gb.cpu.get_b();
-            let result = b.wrapping_sub(1);
-            gb.cpu.set_b(result);
-            return result;
-        }
-        "c" => {
-            let c = gb.cpu.get_c();
-            let result = c.wrapping_sub(1);
-            gb.cpu.set_c(result);
-            return result;
-        }
-        "d" => {
-            let d = gb.cpu.get_d();
-            let result = d.wrapping_sub(1);
-            gb.cpu.set_d(result);
-            return result;
-        }
-        "e" => {
-            let e = gb.cpu.get_e();
-            let result = e.wrapping_sub(1);
-            gb.cpu.set_e(result);
-            return result;
-        }
-        "h" => {
-            let h = gb.cpu.get_h();
-            let result = h.wrapping_sub(1);
-            gb.cpu.set_h(result);
-            return result;
-        }
-        "l" => {
-            let l = gb.cpu.get_l();
-            let result = l.wrapping_sub(1);
-            gb.cpu.set_l(result);
-            return result;
-        }
-        _ => {
-            panic!("Invalid register");
-        }
-    }
-}
-
-fn xor(gb: &mut gameboy::Gameboy, register: &str) -> u8 {
-    match register {
-        "a" => {
-            let a = gb.cpu.get_a();
-            let result = a ^ a;
-            if result == 0 {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
-            gb.cpu.set_a(result);
-            return result;
-        }
-        "b" => {
-            let b = gb.cpu.get_b();
-            let result = b ^ b;
-            if result == 0 {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
-            gb.cpu.set_b(result);
-            return result;
-        }
-        "c" => {
-            let c = gb.cpu.get_c();
-            let result = c ^ c;
-            if result == 0 {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
-            gb.cpu.set_c(result);
-            return result;
-        }
-        "d" => {
-            let d = gb.cpu.get_d();
-            let result = d ^ d;
-            if result == 0 {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
-            gb.cpu.set_d(result);
-            return result;
-        }
-        "e" => {
-            let e = gb.cpu.get_e();
-            let result = e ^ e;
-            if result == 0 {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
-            gb.cpu.set_e(result);
-            return result;
-        }
-        "h" => {
-            let h = gb.cpu.get_h();
-            let result = h ^ h;
-            if result == 0 {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
-            gb.cpu.set_h(result);
-            return result;
-        }
-        "l" => {
-            let l = gb.cpu.get_l();
-            let result = l ^ l;
-            if result == 0 {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
-            gb.cpu.set_l(result);
-            return result;
-        }
-        _ => {
-            panic!("Invalid register");
-        }
-    }
-}
-
-fn increment_16bit(gb: &mut gameboy::Gameboy, register: &str) -> u16 {
-    match register {
-        "bc" => {
-            let bc = gb.cpu.get_bc();
-            let result = bc.wrapping_add(1);
-            gb.cpu.set_bc(result);
-            return result;
-        }
-        "de" => {
-            let de = gb.cpu.get_de();
-            let result = de.wrapping_add(1);
-            gb.cpu.set_de(result);
-            return result;
-        }
-        "hl" => {
-            let hl = gb.cpu.get_hl();
-            let result = hl.wrapping_add(1);
-            gb.cpu.set_hl(result);
-            return result;
-        }
-        "sp" => {
-            let sp = gb.cpu.get_sp();
-            let result = sp.wrapping_add(1);
-            gb.cpu.set_sp(result);
-            return result;
-        }
-        _ => {
-            panic!("Invalid register");
-        }
-    }
-}
-
-fn decrement_16bit(gb: &mut gameboy::Gameboy, register: &str) -> u16 {
-    match register {
-        "bc" => {
-            let bc = gb.cpu.get_bc();
-            let result = bc.wrapping_sub(1);
-            gb.cpu.set_bc(result);
-            return result;
-        }
-        "de" => {
-            let de = gb.cpu.get_de();
-            let result = de.wrapping_sub(1);
-            gb.cpu.set_de(result);
-            return result;
-        }
-        "hl" => {
-            let hl = gb.cpu.get_hl();
-            let result = hl.wrapping_sub(1);
-            gb.cpu.set_hl(result);
-            return result;
-        }
-        "sp" => {
-            let sp = gb.cpu.get_sp();
-            let result = sp.wrapping_sub(1);
-            gb.cpu.set_sp(result);
-            return result;
-        }
-        _ => {
-            panic!("Invalid register");
-        }
-    }
-}
+use crate::{
+    cpu::{self, dump_registers},
+    gameboy,
+};
 
 pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
     let mut cycles: i64 = 0;
@@ -406,6 +123,9 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x18 => {
             // JR e8
+            let value = gb.cpu.get_pc() as i8;
+            gb.cpu.increment_pc();
+            jump_relative(gb, i16::try_from(value).unwrap());
             cycles += 12;
         }
         0x19 => {
@@ -441,11 +161,11 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x20 => {
             // JR NZ e8
-            if gb.cpu.get_z_flag() {
-                let value = i16::try_from(gameboy::read_byte(gb)).unwrap();
-                let signed_pc = i16::try_from(gb.cpu.get_pc()).unwrap();
-                let jump_pc = i16::try_from(signed_pc + value).unwrap();
-                gb.cpu.set_pc(u16::try_from(jump_pc).unwrap());
+            if !gb.cpu.get_z_flag() {
+                let value = gameboy::read_byte(gb) as i8;
+                println!("Jumping {} steps", value);
+                let addr = jump_relative(gb, i16::try_from(value).unwrap());
+                println!("Jumped to {:04X}", addr);
                 cycles += 12;
             } else {
                 cycles += 8;
@@ -486,10 +206,13 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x28 => {
             // JR Z e8
-            // if branch
-            cycles += 12;
-            // if not branch
-            cycles += 8;
+            if gb.cpu.get_z_flag() {
+                let value = gameboy::read_byte(gb) as i8;
+                jump_relative(gb, i16::try_from(value).unwrap());
+                cycles += 12;
+            } else {
+                cycles += 8;
+            }
         }
         0x29 => {
             // ADD HL HL
@@ -525,11 +248,9 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x30 => {
             // JR NC e8
-            if gb.cpu.get_c_flag() {
-                let value = i16::try_from(gameboy::read_byte(gb)).unwrap();
-                let signed_pc = i16::try_from(gb.cpu.get_pc()).unwrap();
-                let jump_pc = i16::try_from(signed_pc + value).unwrap();
-                gb.cpu.set_pc(u16::try_from(jump_pc).unwrap());
+            if !gb.cpu.get_c_flag() {
+                let value = gameboy::read_byte(gb) as i8;
+                jump_relative(gb, i16::try_from(value).unwrap());
                 cycles += 12;
             } else {
                 cycles += 8;
@@ -576,10 +297,13 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x38 => {
             // JR C e8
-            // if branch
-            cycles += 12;
-            // if not branch
-            cycles += 8;
+            if gb.cpu.get_c_flag() {
+                let value = gameboy::read_byte(gb) as i8;
+                jump_relative(gb, i16::try_from(value).unwrap());
+                cycles += 12;
+            } else {
+                cycles += 8;
+            }
         }
         0x39 => {
             // ADD HL SP
@@ -1692,581 +1416,386 @@ fn execute_prefixed(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x40 => {
             // BIT 0 B
-            if get_bit_at_position_8bit(0, gb.cpu.get_b()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(0, gb.cpu.get_b()));
             cycles += 8;
         }
         0x41 => {
             // BIT 0 C
-            if get_bit_at_position_8bit(0, gb.cpu.get_c()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(0, gb.cpu.get_c()));
             cycles += 8;
         }
         0x42 => {
             // BIT 0 D
-            if get_bit_at_position_8bit(0, gb.cpu.get_d()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(0, gb.cpu.get_d()));
             cycles += 8;
         }
         0x43 => {
             // BIT 0 E
-            if get_bit_at_position_8bit(0, gb.cpu.get_e()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(0, gb.cpu.get_e()));
             cycles += 8;
         }
         0x44 => {
             // BIT 0 H
-            if get_bit_at_position_8bit(0, gb.cpu.get_h()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(0, gb.cpu.get_h()));
             cycles += 8;
         }
         0x45 => {
             // BIT 0 L
-            if get_bit_at_position_8bit(0, gb.cpu.get_l()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(0, gb.cpu.get_l()));
             cycles += 8;
         }
         0x46 => {
             // BIT 0 HL
-            if get_bit_at_position_16bit(0, gb.cpu.get_hl()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_16bit(0, gb.cpu.get_hl()));
             cycles += 12;
         }
         0x47 => {
             // BIT 0 A
-            if get_bit_at_position_8bit(0, gb.cpu.get_a()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(0, gb.cpu.get_a()));
             cycles += 8;
         }
         0x48 => {
             // BIT 1 B
-            if get_bit_at_position_8bit(1, gb.cpu.get_b()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(1, gb.cpu.get_b()));
             cycles += 8;
         }
         0x49 => {
             // BIT 1 C
-            if get_bit_at_position_8bit(1, gb.cpu.get_c()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(1, gb.cpu.get_c()));
             cycles += 8;
         }
         0x4A => {
             // BIT 1 D
-            if get_bit_at_position_8bit(1, gb.cpu.get_d()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(1, gb.cpu.get_d()));
             cycles += 8;
         }
         0x4B => {
             // BIT 1 E
-            if get_bit_at_position_8bit(1, gb.cpu.get_e()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(1, gb.cpu.get_e()));
             cycles += 8;
         }
         0x4C => {
             // BIT 1 H
-            if get_bit_at_position_8bit(1, gb.cpu.get_h()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(1, gb.cpu.get_h()));
             cycles += 8;
         }
         0x4D => {
             // BIT 1 L
-            if get_bit_at_position_8bit(1, gb.cpu.get_l()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(1, gb.cpu.get_l()));
             cycles += 8;
         }
         0x4E => {
             // BIT 1 HL
-            if get_bit_at_position_16bit(1, gb.cpu.get_hl()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_16bit(1, gb.cpu.get_hl()));
             cycles += 12;
         }
         0x4F => {
             // BIT 1 A
-            if get_bit_at_position_8bit(1, gb.cpu.get_a()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(1, gb.cpu.get_a()));
             cycles += 8;
         }
         0x50 => {
             // BIT 2 B
-            if get_bit_at_position_8bit(2, gb.cpu.get_b()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(2, gb.cpu.get_b()));
             cycles += 8;
         }
         0x51 => {
             // BIT 2 C
-            if get_bit_at_position_8bit(2, gb.cpu.get_c()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(2, gb.cpu.get_c()));
             cycles += 8;
         }
         0x52 => {
             // BIT 2 D
-            if get_bit_at_position_8bit(2, gb.cpu.get_d()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(2, gb.cpu.get_d()));
             cycles += 8;
         }
         0x53 => {
             // BIT 2 E
-            if get_bit_at_position_8bit(2, gb.cpu.get_e()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(2, gb.cpu.get_e()));
             cycles += 8;
         }
         0x54 => {
             // BIT 2 H
-            if get_bit_at_position_8bit(2, gb.cpu.get_h()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(2, gb.cpu.get_h()));
             cycles += 8;
         }
         0x55 => {
             // BIT 2 L
-            if get_bit_at_position_8bit(2, gb.cpu.get_l()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(2, gb.cpu.get_l()));
             cycles += 8;
         }
         0x56 => {
             // BIT 2 HL
-            if get_bit_at_position_16bit(2, gb.cpu.get_hl()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_16bit(2, gb.cpu.get_hl()));
             cycles += 12;
         }
         0x57 => {
             // BIT 2 A
-            if get_bit_at_position_8bit(2, gb.cpu.get_a()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(2, gb.cpu.get_a()));
             cycles += 8;
         }
         0x58 => {
             // BIT 3 B
-            if get_bit_at_position_8bit(3, gb.cpu.get_b()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(3, gb.cpu.get_b()));
             cycles += 8;
         }
         0x59 => {
             // BIT 3 C
-            if get_bit_at_position_8bit(3, gb.cpu.get_c()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(3, gb.cpu.get_c()));
             cycles += 8;
         }
         0x5A => {
             // BIT 3 D
-            if get_bit_at_position_8bit(3, gb.cpu.get_d()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(3, gb.cpu.get_d()));
             cycles += 8;
         }
         0x5B => {
             // BIT 3 E
-            if get_bit_at_position_8bit(3, gb.cpu.get_e()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(3, gb.cpu.get_e()));
             cycles += 8;
         }
         0x5C => {
             // BIT 3 H
-            if get_bit_at_position_8bit(3, gb.cpu.get_h()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(3, gb.cpu.get_h()));
             cycles += 8;
         }
         0x5D => {
             // BIT 3 L
-            if get_bit_at_position_8bit(3, gb.cpu.get_l()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(3, gb.cpu.get_l()));
             cycles += 8;
         }
         0x5E => {
             // BIT 3 HL
-            if get_bit_at_position_16bit(3, gb.cpu.get_hl()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_16bit(3, gb.cpu.get_hl()));
             cycles += 12;
         }
         0x5F => {
             // BIT 3 A
-            if get_bit_at_position_8bit(3, gb.cpu.get_a()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(3, gb.cpu.get_a()));
             cycles += 8;
         }
         0x60 => {
             // BIT 4 B
-            if get_bit_at_position_8bit(4, gb.cpu.get_b()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(4, gb.cpu.get_b()));
             cycles += 8;
         }
         0x61 => {
             // BIT 4 C
-            if get_bit_at_position_8bit(4, gb.cpu.get_c()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(4, gb.cpu.get_c()));
             cycles += 8;
         }
         0x62 => {
             // BIT 4 D
-            if get_bit_at_position_8bit(4, gb.cpu.get_d()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(4, gb.cpu.get_d()));
             cycles += 8;
         }
         0x63 => {
             // BIT 4 E
-            if get_bit_at_position_8bit(4, gb.cpu.get_e()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(4, gb.cpu.get_e()));
             cycles += 8;
         }
         0x64 => {
             // BIT 4 H
-            if get_bit_at_position_8bit(4, gb.cpu.get_h()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(4, gb.cpu.get_h()));
             cycles += 8;
         }
         0x65 => {
             // BIT 4 L
-            if get_bit_at_position_8bit(4, gb.cpu.get_l()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(4, gb.cpu.get_l()));
             cycles += 8;
         }
         0x66 => {
             // BIT 4 HL
-            if get_bit_at_position_16bit(4, gb.cpu.get_hl()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_16bit(4, gb.cpu.get_hl()));
             cycles += 12;
         }
         0x67 => {
             // BIT 4 A
-            if get_bit_at_position_8bit(4, gb.cpu.get_a()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(4, gb.cpu.get_a()));
             cycles += 8;
         }
         0x68 => {
             // BIT 5 B
-            if get_bit_at_position_8bit(5, gb.cpu.get_b()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(5, gb.cpu.get_b()));
             cycles += 8;
         }
         0x69 => {
             // BIT 5 C
-            if get_bit_at_position_8bit(5, gb.cpu.get_c()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(5, gb.cpu.get_c()));
             cycles += 8;
         }
         0x6A => {
             // BIT 5 D
-            if get_bit_at_position_8bit(5, gb.cpu.get_d()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(5, gb.cpu.get_d()));
             cycles += 8;
         }
         0x6B => {
             // BIT 5 E
-            if get_bit_at_position_8bit(5, gb.cpu.get_e()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(5, gb.cpu.get_e()));
             cycles += 8;
         }
         0x6C => {
             // BIT 5 H
-            if get_bit_at_position_8bit(5, gb.cpu.get_h()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(5, gb.cpu.get_h()));
             cycles += 8;
         }
         0x6D => {
             // BIT 5 L
-            if get_bit_at_position_8bit(5, gb.cpu.get_l()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(5, gb.cpu.get_l()));
             cycles += 8;
         }
         0x6E => {
             // BIT 5 HL
-            if get_bit_at_position_16bit(5, gb.cpu.get_hl()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_16bit(5, gb.cpu.get_hl()));
             cycles += 12;
         }
         0x6F => {
             // BIT 5 A
-            if get_bit_at_position_8bit(5, gb.cpu.get_a()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(5, gb.cpu.get_a()));
             cycles += 8;
         }
         0x70 => {
             // BIT 6 B
-            if get_bit_at_position_8bit(6, gb.cpu.get_b()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(6, gb.cpu.get_b()));
             cycles += 8;
         }
         0x71 => {
             // BIT 6 C
-            if get_bit_at_position_8bit(6, gb.cpu.get_c()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(6, gb.cpu.get_c()));
             cycles += 8;
         }
         0x72 => {
             // BIT 6 D
-            if get_bit_at_position_8bit(6, gb.cpu.get_d()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(6, gb.cpu.get_d()));
             cycles += 8;
         }
         0x73 => {
             // BIT 6 E
-            if get_bit_at_position_8bit(6, gb.cpu.get_e()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(6, gb.cpu.get_e()));
             cycles += 8;
         }
         0x74 => {
             // BIT 6 H
-            if get_bit_at_position_8bit(6, gb.cpu.get_h()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(6, gb.cpu.get_h()));
             cycles += 8;
         }
         0x75 => {
             // BIT 6 L
-            if get_bit_at_position_8bit(6, gb.cpu.get_l()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(6, gb.cpu.get_l()));
             cycles += 8;
         }
         0x76 => {
             // BIT 6 HL
-            if get_bit_at_position_16bit(6, gb.cpu.get_hl()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_16bit(6, gb.cpu.get_hl()));
             cycles += 12;
         }
         0x77 => {
             // BIT 6 A
-            if get_bit_at_position_8bit(6, gb.cpu.get_a()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(6, gb.cpu.get_a()));
             cycles += 8;
         }
         0x78 => {
             // BIT 7 B
-            if get_bit_at_position_8bit(7, gb.cpu.get_b()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(7, gb.cpu.get_b()));
             cycles += 8;
         }
         0x79 => {
             // BIT 7 C
-            if get_bit_at_position_8bit(7, gb.cpu.get_c()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(7, gb.cpu.get_c()));
             cycles += 8;
         }
         0x7A => {
             // BIT 7 D
-            if get_bit_at_position_8bit(7, gb.cpu.get_d()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(7, gb.cpu.get_d()));
             cycles += 8;
         }
         0x7B => {
             // BIT 7 E
-            if get_bit_at_position_8bit(7, gb.cpu.get_e()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(7, gb.cpu.get_e()));
             cycles += 8;
         }
         0x7C => {
             // BIT 7 H
-            println!("{:#08b}", gb.cpu.get_h());
-            println!("{:#?}", get_bit_at_position_8bit(7, gb.cpu.get_h()));
-            cpu::dump_registers(&gb.cpu);
-            if get_bit_at_position_8bit(7, gb.cpu.get_h()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(7, gb.cpu.get_h()));
             cycles += 8;
         }
         0x7D => {
             // BIT 7 L
-            if get_bit_at_position_8bit(7, gb.cpu.get_l()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(7, gb.cpu.get_l()));
             cycles += 8;
         }
         0x7E => {
             // BIT 7 HL
-            if get_bit_at_position_16bit(7, gb.cpu.get_hl()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_16bit(7, gb.cpu.get_hl()));
             cycles += 12;
         }
         0x7F => {
             // BIT 7 A
-            if get_bit_at_position_8bit(7, gb.cpu.get_a()) {
-                gb.cpu.set_z_flag(true);
-            } else {
-                gb.cpu.set_z_flag(false);
-            }
+            gb.cpu
+                .set_z_flag(!get_bit_at_position_8bit(7, gb.cpu.get_a()));
             cycles += 8;
         }
         0x80 => {
@@ -2786,4 +2315,400 @@ fn execute_prefixed(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
     }
     return cycles;
+}
+
+// Jump/Call functions
+fn jump_relative(gb: &mut gameboy::Gameboy, value: i16) -> u16 {
+    let signed_pc = i16::try_from(gb.cpu.get_pc()).unwrap();
+    let jump_pc = i16::try_from(signed_pc + value).unwrap();
+    gb.cpu.set_pc(u16::try_from(jump_pc).unwrap());
+    return u16::try_from(jump_pc).unwrap();
+}
+
+// bit and shift functions
+fn get_bit_at_position_8bit(n: u32, num: u8) -> bool {
+    return (num & (1 << (7 - n))) != 0;
+}
+
+fn get_bit_at_position_16bit(n: u32, num: u16) -> bool {
+    return (num & (1 << (15 - n))) != 0;
+}
+
+// Load functions
+fn load_8bit(gb: &mut gameboy::Gameboy, register: &str, value: u8) {
+    match register {
+        "a" => gb.cpu.set_a(value),
+        "b" => gb.cpu.set_b(value),
+        "c" => gb.cpu.set_c(value),
+        "d" => gb.cpu.set_d(value),
+        "e" => gb.cpu.set_e(value),
+        "h" => gb.cpu.set_h(value),
+        "l" => gb.cpu.set_l(value),
+        "i" => gb.cpu.set_i(value),
+        "r" => gb.cpu.set_r(value),
+        _ => panic!("Invalid register"),
+    }
+}
+
+fn load_16bit(gb: &mut gameboy::Gameboy, register: &str, value: u16) {
+    match register {
+        "af" => gb.cpu.set_af(value),
+        "bc" => gb.cpu.set_bc(value),
+        "de" => gb.cpu.set_de(value),
+        "hl" => gb.cpu.set_hl(value),
+        "sp" => gb.cpu.set_sp(value),
+        _ => panic!("Invalid register"),
+    }
+}
+
+// ALU functions
+fn increment_8bit(gb: &mut gameboy::Gameboy, register: &str) -> u8 {
+    match register {
+        "a" => {
+            let a = gb.cpu.get_a();
+            let result = a.wrapping_add(1);
+            gb.cpu.set_a(result);
+            return result;
+        }
+        "b" => {
+            let b = gb.cpu.get_b();
+            let result = b.wrapping_add(1);
+            gb.cpu.set_b(result);
+            return result;
+        }
+        "c" => {
+            let c = gb.cpu.get_c();
+            let result = c.wrapping_add(1);
+            gb.cpu.set_c(result);
+            return result;
+        }
+        "d" => {
+            let d = gb.cpu.get_d();
+            let result = d.wrapping_add(1);
+            gb.cpu.set_d(result);
+            return result;
+        }
+        "e" => {
+            let e = gb.cpu.get_e();
+            let result = e.wrapping_add(1);
+            gb.cpu.set_e(result);
+            return result;
+        }
+        "h" => {
+            let h = gb.cpu.get_h();
+            let result = h.wrapping_add(1);
+            gb.cpu.set_h(result);
+            return result;
+        }
+        "l" => {
+            let l = gb.cpu.get_l();
+            let result = l.wrapping_add(1);
+            gb.cpu.set_l(result);
+            return result;
+        }
+        _ => {
+            panic!("Invalid register");
+        }
+    }
+}
+
+fn decrement_8bit(gb: &mut gameboy::Gameboy, register: &str) -> u8 {
+    match register {
+        "a" => {
+            let a = gb.cpu.get_a();
+            let result = a.wrapping_sub(1);
+            gb.cpu.set_a(result);
+            return result;
+        }
+        "b" => {
+            let b = gb.cpu.get_b();
+            let result = b.wrapping_sub(1);
+            gb.cpu.set_b(result);
+            return result;
+        }
+        "c" => {
+            let c = gb.cpu.get_c();
+            let result = c.wrapping_sub(1);
+            gb.cpu.set_c(result);
+            return result;
+        }
+        "d" => {
+            let d = gb.cpu.get_d();
+            let result = d.wrapping_sub(1);
+            gb.cpu.set_d(result);
+            return result;
+        }
+        "e" => {
+            let e = gb.cpu.get_e();
+            let result = e.wrapping_sub(1);
+            gb.cpu.set_e(result);
+            return result;
+        }
+        "h" => {
+            let h = gb.cpu.get_h();
+            let result = h.wrapping_sub(1);
+            gb.cpu.set_h(result);
+            return result;
+        }
+        "l" => {
+            let l = gb.cpu.get_l();
+            let result = l.wrapping_sub(1);
+            gb.cpu.set_l(result);
+            return result;
+        }
+        _ => {
+            panic!("Invalid register");
+        }
+    }
+}
+
+fn xor(gb: &mut gameboy::Gameboy, register: &str) -> u8 {
+    match register {
+        "a" => {
+            let a = gb.cpu.get_a();
+            let result = a ^ a;
+            if result == 0 {
+                gb.cpu.set_z_flag(true);
+            } else {
+                gb.cpu.set_z_flag(false);
+            }
+            gb.cpu.set_a(result);
+            return result;
+        }
+        "b" => {
+            let a = gb.cpu.get_a();
+            let b = gb.cpu.get_b();
+            let result = a ^ b;
+            if result == 0 {
+                gb.cpu.set_z_flag(true);
+            } else {
+                gb.cpu.set_z_flag(false);
+            }
+            gb.cpu.set_b(result);
+            return result;
+        }
+        "c" => {
+            let a = gb.cpu.get_a();
+            let c = gb.cpu.get_c();
+            let result = a ^ c;
+            if result == 0 {
+                gb.cpu.set_z_flag(true);
+            } else {
+                gb.cpu.set_z_flag(false);
+            }
+            gb.cpu.set_c(result);
+            return result;
+        }
+        "d" => {
+            let a = gb.cpu.get_a();
+            let d = gb.cpu.get_d();
+            let result = a ^ d;
+            if result == 0 {
+                gb.cpu.set_z_flag(true);
+            } else {
+                gb.cpu.set_z_flag(false);
+            }
+            gb.cpu.set_d(result);
+            return result;
+        }
+        "e" => {
+            let a = gb.cpu.get_a();
+            let e = gb.cpu.get_e();
+            let result = a ^ e;
+            if result == 0 {
+                gb.cpu.set_z_flag(true);
+            } else {
+                gb.cpu.set_z_flag(false);
+            }
+            gb.cpu.set_e(result);
+            return result;
+        }
+        "h" => {
+            let a = gb.cpu.get_a();
+            let h = gb.cpu.get_h();
+            let result = a ^ h;
+            if result == 0 {
+                gb.cpu.set_z_flag(true);
+            } else {
+                gb.cpu.set_z_flag(false);
+            }
+            gb.cpu.set_h(result);
+            return result;
+        }
+        "l" => {
+            let a = gb.cpu.get_a();
+            let l = gb.cpu.get_l();
+            let result = a ^ l;
+            if result == 0 {
+                gb.cpu.set_z_flag(true);
+            } else {
+                gb.cpu.set_z_flag(false);
+            }
+            gb.cpu.set_l(result);
+            return result;
+        }
+        _ => {
+            panic!("Invalid register");
+        }
+    }
+}
+
+fn increment_16bit(gb: &mut gameboy::Gameboy, register: &str) -> u16 {
+    match register {
+        "bc" => {
+            let bc = gb.cpu.get_bc();
+            let result = bc.wrapping_add(1);
+            gb.cpu.set_bc(result);
+            return result;
+        }
+        "de" => {
+            let de = gb.cpu.get_de();
+            let result = de.wrapping_add(1);
+            gb.cpu.set_de(result);
+            return result;
+        }
+        "hl" => {
+            let hl = gb.cpu.get_hl();
+            let result = hl.wrapping_add(1);
+            gb.cpu.set_hl(result);
+            return result;
+        }
+        "sp" => {
+            let sp = gb.cpu.get_sp();
+            let result = sp.wrapping_add(1);
+            gb.cpu.set_sp(result);
+            return result;
+        }
+        _ => {
+            panic!("Invalid register");
+        }
+    }
+}
+
+fn decrement_16bit(gb: &mut gameboy::Gameboy, register: &str) -> u16 {
+    match register {
+        "bc" => {
+            let bc = gb.cpu.get_bc();
+            let result = bc.wrapping_sub(1);
+            gb.cpu.set_bc(result);
+            return result;
+        }
+        "de" => {
+            let de = gb.cpu.get_de();
+            let result = de.wrapping_sub(1);
+            gb.cpu.set_de(result);
+            return result;
+        }
+        "hl" => {
+            let hl = gb.cpu.get_hl();
+            let result = hl.wrapping_sub(1);
+            gb.cpu.set_hl(result);
+            return result;
+        }
+        "sp" => {
+            let sp = gb.cpu.get_sp();
+            let result = sp.wrapping_sub(1);
+            gb.cpu.set_sp(result);
+            return result;
+        }
+        _ => {
+            panic!("Invalid register");
+        }
+    }
+}
+
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_jump_relative() {
+        let mut gb = gameboy::create_gameboy();
+        gb.cpu.set_pc(0x0000);
+        jump_relative(&mut gb, 5);
+        assert_eq!(gb.cpu.get_pc(), 0x0005);
+        jump_relative(&mut gb, -5);
+        assert_eq!(gb.cpu.get_pc(), 0x0000);
+    }
+
+    #[test]
+    fn test_xor() {
+        let mut gb = gameboy::create_gameboy();
+
+        // xor a with itself is always 0, z flag should be set
+        gb.cpu.set_a(0x00);
+        xor(&mut gb, "a");
+        assert_eq!(gb.cpu.get_a(), 0x00);
+        assert_eq!(gb.cpu.get_z_flag(), true);
+        gb.cpu.set_a(0x01);
+        xor(&mut gb, "a");
+        assert_eq!(gb.cpu.get_a(), 0x00);
+        assert_eq!(gb.cpu.get_z_flag(), true);
+
+        // xor a with b is 0 only if a == b, z flag should be set
+        gb.cpu.set_a(0x00);
+        gb.cpu.set_b(0x00);
+        xor(&mut gb, "b");
+        assert_eq!(gb.cpu.get_b(), 0x00);
+        assert_eq!(gb.cpu.get_z_flag(), true);
+
+        // xor a with b is 1 otherwise, z flag should be unset
+        gb.cpu.set_a(0x01);
+        gb.cpu.set_b(0x00);
+        xor(&mut gb, "b");
+        assert_eq!(gb.cpu.get_b(), 0x01);
+        assert_eq!(gb.cpu.get_z_flag(), false);
+
+        // repeat for other registers
+        gb.cpu.set_a(0x00);
+        gb.cpu.set_c(0x00);
+        gb.cpu.set_d(0x00);
+        gb.cpu.set_e(0x00);
+        gb.cpu.set_h(0x00);
+        gb.cpu.set_l(0x00);
+        xor(&mut gb, "c");
+        assert_eq!(gb.cpu.get_c(), 0x00);
+        assert_eq!(gb.cpu.get_z_flag(), true);
+        xor(&mut gb, "d");
+        assert_eq!(gb.cpu.get_d(), 0x00);
+        assert_eq!(gb.cpu.get_z_flag(), true);
+        xor(&mut gb, "e");
+        assert_eq!(gb.cpu.get_e(), 0x00);
+        assert_eq!(gb.cpu.get_z_flag(), true);
+        xor(&mut gb, "h");
+        assert_eq!(gb.cpu.get_h(), 0x00);
+        assert_eq!(gb.cpu.get_z_flag(), true);
+        xor(&mut gb, "l");
+        assert_eq!(gb.cpu.get_l(), 0x00);
+        assert_eq!(gb.cpu.get_z_flag(), true);
+
+        gb.cpu.set_a(0x01);
+        gb.cpu.set_c(0x00);
+        gb.cpu.set_d(0x00);
+        gb.cpu.set_e(0x00);
+        gb.cpu.set_h(0x00);
+        gb.cpu.set_l(0x00);
+        xor(&mut gb, "c");
+        assert_eq!(gb.cpu.get_c(), 0x01);
+        assert_eq!(gb.cpu.get_z_flag(), false);
+        xor(&mut gb, "d");
+        assert_eq!(gb.cpu.get_d(), 0x01);
+        assert_eq!(gb.cpu.get_z_flag(), false);
+        xor(&mut gb, "e");
+        assert_eq!(gb.cpu.get_e(), 0x01);
+        assert_eq!(gb.cpu.get_z_flag(), false);
+        xor(&mut gb, "h");
+        assert_eq!(gb.cpu.get_h(), 0x01);
+        assert_eq!(gb.cpu.get_z_flag(), false);
+        xor(&mut gb, "l");
+        assert_eq!(gb.cpu.get_l(), 0x01);
+        assert_eq!(gb.cpu.get_z_flag(), false);
+    }
+
+    #[test]
+    fn test_get_bit_at() {
+        // 0b11111110
+        let val: u8 = 0xFE;
+        let bit = get_bit_at_position_8bit(7, val) as u8;
+        assert_eq!(bit, 0);
+    }
 }

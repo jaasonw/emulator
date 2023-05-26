@@ -287,6 +287,7 @@ impl CPU {
             "bc" => self.get_bc(),
             "de" => self.get_de(),
             "hl" => self.get_hl(),
+            "sp" => self.get_sp(),
             _ => panic!("Invalid register"),
         }
     }
@@ -311,6 +312,7 @@ impl CPU {
             "bc" => self.set_bc(value),
             "de" => self.set_de(value),
             "hl" => self.set_hl(value),
+            "sp" => self.set_sp(value),
             _ => panic!("Invalid register"),
         }
     }

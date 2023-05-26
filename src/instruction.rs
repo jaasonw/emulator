@@ -1,4 +1,4 @@
-use core::panic;
+// use core::panic;
 
 use crate::{cpu, gameboy};
 
@@ -11,7 +11,7 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
             // NOP
             cpu::dump_registers(&gb.cpu);
             // print ram
-            println!("{:?}", gb.ram);
+            // println!("{:?}", gb.ram);
             panic!("NOP");
             // let _ = Command::new("pause").status();
             cycles += 4;
@@ -1065,13 +1065,16 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0xC2 => {
             // JP NZ a16
-            // if branch
-            cycles += 16;
-            // if not branch
-            cycles += 12;
+            if !gb.cpu.get_z_flag() {
+                jump(gb, gb.cpu.get_pc());
+                cycles += 16;
+            } else {
+                cycles += 12;
+            }
         }
         0xC3 => {
             // JP a16
+            jump(gb, gb.cpu.get_pc());
             cycles += 16;
         }
         0xC4 => {
@@ -1108,10 +1111,12 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0xCA => {
             // JP Z a16
-            // if branch
-            cycles += 16;
-            // if not branch
-            cycles += 12;
+            if gb.cpu.get_z_flag() {
+                jump(gb, gb.cpu.get_pc());
+                cycles += 16;
+            } else {
+                cycles += 12;
+            }
         }
         0xCB => {
             // PREFIX
@@ -1153,10 +1158,12 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0xD2 => {
             // JP NC a16
-            // if branch
-            cycles += 16;
-            // if not branch
-            cycles += 12;
+            if !gb.cpu.get_c_flag() {
+                jump(gb, gb.cpu.get_pc());
+                cycles += 16;
+            } else {
+                cycles += 12;
+            }
         }
         0xD3 => {
             // ILLEGAL_D3
@@ -1197,10 +1204,12 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0xDA => {
             // JP C a16
-            // if branch
-            cycles += 16;
-            // if not branch
-            cycles += 12;
+            if gb.cpu.get_c_flag() {
+                jump(gb, gb.cpu.get_pc());
+                cycles += 16;
+            } else {
+                cycles += 12;
+            }
         }
         0xDB => {
             // ILLEGAL_DB
@@ -2571,6 +2580,11 @@ fn jump_relative(gb: &mut gameboy::Gameboy, value: i16) -> u16 {
     let jump_pc = i16::try_from(signed_pc + value).unwrap();
     gb.cpu.set_pc(u16::try_from(jump_pc).unwrap());
     return u16::try_from(jump_pc).unwrap();
+}
+
+fn jump(gb: &mut gameboy::Gameboy, value: u16) -> u16 {
+    gb.cpu.set_pc(value);
+    return value;
 }
 
 // bit and shift functions

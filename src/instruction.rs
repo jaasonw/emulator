@@ -1,7 +1,6 @@
-use crate::{
-    cpu::{self, dump_registers},
-    gameboy,
-};
+use core::panic;
+
+use crate::{cpu, gameboy};
 
 pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
     let mut cycles: i64 = 0;
@@ -191,6 +190,11 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x22 => {
             // LD HL+ A
+            let address = gb.cpu.get_hl();
+            gb.ram[address as usize] = gb.cpu.get_a();
+            let hl = gb.cpu.get_hl();
+            gb.cpu.set_hl(hl + 1);
+            load_16bit(gb, "hl", hl + 1);
             cycles += 8;
         }
         0x23 => {
@@ -261,6 +265,10 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x2F => {
             // CPL
+            // Take the one's complement (i.e., flip all bits) of the contents of register A.
+            gb.cpu.set_a(!gb.cpu.get_a());
+            gb.cpu.set_n_flag(true);
+            gb.cpu.set_h_flag(true);
             cycles += 4;
         }
         0x30 => {
@@ -283,9 +291,9 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
             // LD HL- A
             // Load register A to the memory address pointed to by HL and then decrement the value of HL
             let address = gb.cpu.get_hl();
-            println!("address: {:?}", address);
             gb.ram[address as usize] = gb.cpu.get_a();
             let hl = gb.cpu.get_hl();
+            gb.cpu.set_hl(hl - 1);
             load_16bit(gb, "hl", hl - 1);
             cycles += 8;
         }
@@ -296,13 +304,15 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x34 => {
             // INC HL
-            increment_16bit(gb, "hl");
+            // increment_16bit(gb, "hl");
             cycles += 12;
+            panic!("Not implemented");
         }
         0x35 => {
             // DEC HL
-            decrement_16bit(gb, "hl");
+            // decrement_16bit(gb, "hl");
             cycles += 12;
+            panic!("Not implemented");
         }
         0x36 => {
             // LD HL n8
@@ -314,6 +324,7 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x37 => {
             // SCF
+            gb.cpu.set_c_flag(true);
             cycles += 4;
         }
         0x38 => {
@@ -360,6 +371,7 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x3F => {
             // CCF
+            gb.cpu.set_c_flag(!gb.cpu.get_c_flag());
             cycles += 4;
         }
         0x40 => {
@@ -712,162 +724,211 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x80 => {
             // ADD A B
+            add(gb, "b");
             cycles += 4;
         }
         0x81 => {
             // ADD A C
+            add(gb, "c");
             cycles += 4;
         }
         0x82 => {
             // ADD A D
+            add(gb, "d");
             cycles += 4;
         }
         0x83 => {
             // ADD A E
+            add(gb, "e");
             cycles += 4;
         }
         0x84 => {
             // ADD A H
+            add(gb, "h");
             cycles += 4;
         }
         0x85 => {
             // ADD A L
+            add(gb, "l");
             cycles += 4;
         }
         0x86 => {
             // ADD A HL
+            let addr = gb.cpu.get_hl();
+            let value = gb.ram[addr as usize];
+            add_immediate_value(gb, value);
             cycles += 8;
         }
         0x87 => {
             // ADD A A
+            add(gb, "a");
             cycles += 4;
         }
         0x88 => {
             // ADC A B
+            add_with_carry(gb, "b");
             cycles += 4;
         }
         0x89 => {
             // ADC A C
+            add_with_carry(gb, "c");
             cycles += 4;
         }
         0x8A => {
             // ADC A D
+            add_with_carry(gb, "d");
             cycles += 4;
         }
         0x8B => {
             // ADC A E
+            add_with_carry(gb, "e");
             cycles += 4;
         }
         0x8C => {
             // ADC A H
+            add_with_carry(gb, "h");
             cycles += 4;
         }
         0x8D => {
             // ADC A L
+            add_with_carry(gb, "l");
             cycles += 4;
         }
         0x8E => {
             // ADC A HL
+            let addr = gb.cpu.get_hl();
+            let value = gb.ram[addr as usize];
+            add_with_carry_immediate_value(gb, value);
             cycles += 8;
         }
         0x8F => {
             // ADC A A
+            add_with_carry(gb, "a");
             cycles += 4;
         }
         0x90 => {
             // SUB B
+            sub(gb, "b");
             cycles += 4;
         }
         0x91 => {
             // SUB C
+            sub(gb, "c");
             cycles += 4;
         }
         0x92 => {
             // SUB D
+            sub(gb, "d");
             cycles += 4;
         }
         0x93 => {
             // SUB E
+            sub(gb, "e");
             cycles += 4;
         }
         0x94 => {
             // SUB H
+            sub(gb, "h");
             cycles += 4;
         }
         0x95 => {
             // SUB L
+            sub(gb, "l");
             cycles += 4;
         }
         0x96 => {
             // SUB HL
+            let addr = gb.cpu.get_hl();
+            let value = gb.ram[addr as usize];
+            sub_immediate_value(gb, value);
             cycles += 8;
         }
         0x97 => {
             // SUB A
+            sub(gb, "a");
             cycles += 4;
         }
         0x98 => {
             // SBC A B
+            sub_with_carry(gb, "b");
             cycles += 4;
         }
         0x99 => {
             // SBC A C
+            sub_with_carry(gb, "c");
             cycles += 4;
         }
         0x9A => {
             // SBC A D
+            sub_with_carry(gb, "d");
             cycles += 4;
         }
         0x9B => {
             // SBC A E
+            sub_with_carry(gb, "e");
             cycles += 4;
         }
         0x9C => {
             // SBC A H
+            sub_with_carry(gb, "h");
             cycles += 4;
         }
         0x9D => {
             // SBC A L
+            sub_with_carry(gb, "l");
             cycles += 4;
         }
         0x9E => {
             // SBC A HL
+            let addr = gb.cpu.get_hl();
+            let value = gb.ram[addr as usize];
+            sub_with_carry_immediate_value(gb, value);
             cycles += 8;
         }
         0x9F => {
             // SBC A A
+            sub_with_carry(gb, "a");
             cycles += 4;
         }
         0xA0 => {
             // AND B
+            and(gb, "b");
             cycles += 4;
         }
         0xA1 => {
             // AND C
+            and(gb, "c");
             cycles += 4;
         }
         0xA2 => {
             // AND D
+            and(gb, "d");
             cycles += 4;
         }
         0xA3 => {
             // AND E
+            and(gb, "e");
             cycles += 4;
         }
         0xA4 => {
             // AND H
+            and(gb, "h");
             cycles += 4;
         }
         0xA5 => {
             // AND L
+            and(gb, "l");
             cycles += 4;
         }
         0xA6 => {
             // AND HL
+            and(gb, "h");
+            and(gb, "l");
             cycles += 8;
         }
         0xA7 => {
             // AND A
+            and(gb, "a");
             cycles += 4;
         }
         0xA8 => {
@@ -904,74 +965,90 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0xAF => {
             // XOR A
-            // gb.cpu.set_a(0);
             xor(gb, "a");
             cycles += 4;
         }
         0xB0 => {
             // OR B
+            or(gb, "b");
             cycles += 4;
         }
         0xB1 => {
             // OR C
+            or(gb, "c");
             cycles += 4;
         }
         0xB2 => {
             // OR D
+            or(gb, "d");
             cycles += 4;
         }
         0xB3 => {
             // OR E
+            or(gb, "e");
             cycles += 4;
         }
         0xB4 => {
             // OR H
+            or(gb, "h");
             cycles += 4;
         }
         0xB5 => {
             // OR L
+            or(gb, "l");
             cycles += 4;
         }
         0xB6 => {
             // OR HL
+            or(gb, "h");
+            or(gb, "l");
             cycles += 8;
         }
         0xB7 => {
             // OR A
+            or(gb, "a");
             cycles += 4;
         }
         0xB8 => {
             // CP B
+            compare(gb, "b");
             cycles += 4;
         }
         0xB9 => {
             // CP C
+            compare(gb, "c");
             cycles += 4;
         }
         0xBA => {
             // CP D
+            compare(gb, "d");
             cycles += 4;
         }
         0xBB => {
             // CP E
+            compare(gb, "e");
             cycles += 4;
         }
         0xBC => {
             // CP H
+            compare(gb, "h");
             cycles += 4;
         }
         0xBD => {
             // CP L
+            compare(gb, "l");
             cycles += 4;
         }
         0xBE => {
             // CP HL
             let addr = gb.cpu.get_hl();
-            
+            let value = gb.ram[addr as usize];
+            compare_immediate_value(gb, value);
             cycles += 8;
         }
         0xBF => {
             // CP A
+            compare(gb, "a");
             cycles += 4;
         }
         0xC0 => {
@@ -1011,6 +1088,7 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0xC6 => {
             // ADD A n8
+            add_immediate(gb);
             cycles += 8;
         }
         0xC7 => {
@@ -1054,6 +1132,7 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0xCE => {
             // ADC A n8
+            add_with_carry_immediate(gb);
             cycles += 8;
         }
         0xCF => {
@@ -1081,6 +1160,7 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0xD3 => {
             // ILLEGAL_D3
+            panic!("Illegal opcode: {:#04X}", opcode);
             cycles += 4;
         }
         0xD4 => {
@@ -1097,6 +1177,7 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0xD6 => {
             // SUB n8
+            sub_immediate(gb);
             cycles += 8;
         }
         0xD7 => {
@@ -1124,6 +1205,7 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         0xDB => {
             // ILLEGAL_DB
             cycles += 4;
+            panic!("Illegal opcode: {:#04X}", opcode);
         }
         0xDC => {
             // CALL C a16
@@ -1135,9 +1217,11 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         0xDD => {
             // ILLEGAL_DD
             cycles += 4;
+            panic!("Illegal opcode: {:#04X}", opcode);
         }
         0xDE => {
             // SBC A n8
+            sub_with_carry_immediate(gb);
             cycles += 8;
         }
         0xDF => {
@@ -1168,10 +1252,12 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         0xE3 => {
             // ILLEGAL_E3
             cycles += 4;
+            panic!("Illegal opcode: {:#04X}", opcode);
         }
         0xE4 => {
             // ILLEGAL_E4
             cycles += 4;
+            panic!("Illegal opcode: {:#04X}", opcode);
         }
         0xE5 => {
             // PUSH HL
@@ -1180,6 +1266,7 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0xE6 => {
             // AND n8
+            and_immediate(gb);
             cycles += 8;
         }
         0xE7 => {
@@ -1205,17 +1292,21 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         0xEB => {
             // ILLEGAL_EB
             cycles += 4;
+            panic!("Illegal opcode: {:#04X}", opcode);
         }
         0xEC => {
             // ILLEGAL_EC
             cycles += 4;
+            panic!("Illegal opcode: {:#04X}", opcode);
         }
         0xED => {
             // ILLEGAL_ED
             cycles += 4;
+            panic!("Illegal opcode: {:#04X}", opcode);
         }
         0xEE => {
             // XOR n8
+            xor_immediate(gb);
             cycles += 8;
         }
         0xEF => {
@@ -1258,6 +1349,7 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0xF6 => {
             // OR n8
+            or_immediate(gb);
             cycles += 8;
         }
         0xF7 => {
@@ -1287,13 +1379,16 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         0xFC => {
             // ILLEGAL_FC
             cycles += 4;
+            panic!("Illegal opcode: {:#04X}", opcode);
         }
         0xFD => {
             // ILLEGAL_FD
+            panic!("Illegal opcode: {:#04X}", opcode);
             cycles += 4;
         }
         0xFE => {
             // CP n8
+            compare_immediate(gb);
             cycles += 8;
         }
         0xFF => {
@@ -2536,6 +2631,10 @@ fn pop(gb: &mut gameboy::Gameboy, register: &str) {
 fn increment_8bit(gb: &mut gameboy::Gameboy, register: &str) -> u8 {
     let current = gb.cpu.get_register_8bit(register);
     let result = current.wrapping_add(1);
+    gb.cpu.set_z_flag(result == 0);
+    gb.cpu.set_n_flag(true);
+    gb.cpu.set_h_flag(result & 0xF == 0xF);
+
     load_8bit(gb, register, result);
     return result;
 }
@@ -2543,20 +2642,11 @@ fn increment_8bit(gb: &mut gameboy::Gameboy, register: &str) -> u8 {
 fn decrement_8bit(gb: &mut gameboy::Gameboy, register: &str) -> u8 {
     let current = gb.cpu.get_register_8bit(register);
     let result = current.wrapping_sub(1);
+    gb.cpu.set_z_flag(result == 0);
+    gb.cpu.set_n_flag(true);
+    gb.cpu.set_h_flag(result & 0xF == 0xF);
+    gb.cpu.set_c_flag(current == 0);
     load_8bit(gb, register, result);
-    return result;
-}
-
-fn xor(gb: &mut gameboy::Gameboy, register: &str) -> u8 {
-    let a = gb.cpu.get_a();
-    let value = gb.cpu.get_register_8bit(register);
-    let result = a ^ value;
-    if result == 0 {
-        gb.cpu.set_z_flag(true);
-    } else {
-        gb.cpu.set_z_flag(false);
-    }
-    gb.cpu.set_register_8bit(register, result);
     return result;
 }
 
@@ -2571,6 +2661,203 @@ fn decrement_16bit(gb: &mut gameboy::Gameboy, register: &str) -> u16 {
     let current = gb.cpu.get_register_16bit(register);
     let result = current.wrapping_sub(1);
     load_16bit(gb, register, result);
+    return result;
+}
+
+fn add(gb: &mut gameboy::Gameboy, register: &str) -> u8 {
+    let a = gb.cpu.get_a();
+    let value = gb.cpu.get_register_8bit(register);
+    let (result, overflow) = a.overflowing_add(value);
+    gb.cpu.set_z_flag(result == 0);
+    gb.cpu.set_n_flag(false);
+    gb.cpu.set_h_flag((a & 0xF) + (value & 0xF) > 0xF);
+    gb.cpu.set_c_flag(overflow);
+    gb.cpu.set_a(result);
+    return result;
+}
+
+fn add_with_carry(gb: &mut gameboy::Gameboy, register: &str) -> u8 {
+    let a = gb.cpu.get_a();
+    let value = gb.cpu.get_register_8bit(register);
+    let carry = if gb.cpu.get_c_flag() { 1 } else { 0 };
+    let result = a.wrapping_add(value).wrapping_add(carry);
+    gb.cpu.set_z_flag(result == 0);
+    gb.cpu.set_n_flag(false);
+    gb.cpu.set_h_flag((a & 0xF) + (value & 0xF) + carry > 0xF);
+    gb.cpu
+        .set_c_flag(a as u16 + value as u16 + carry as u16 > 0xFF);
+    gb.cpu.set_a(result);
+    return result;
+}
+
+fn add_immediate_value(gb: &mut gameboy::Gameboy, value: u8) -> u8 {
+    // cheat and reuse the logic from add
+    let temp = gb.cpu.get_b();
+    gb.cpu.set_b(value);
+    let result = add(gb, "b");
+    gb.cpu.set_b(temp);
+    gb.cpu.set_a(result);
+    return result;
+}
+
+fn add_with_carry_immediate_value(gb: &mut gameboy::Gameboy, value: u8) -> u8 {
+    // cheat and reuse the logic from add
+    let temp = gb.cpu.get_b();
+    gb.cpu.set_b(value);
+    let result = add_with_carry(gb, "b");
+    gb.cpu.set_b(temp);
+    gb.cpu.set_a(result);
+    return result;
+}
+
+fn add_immediate(gb: &mut gameboy::Gameboy) -> u8 {
+    let value = gameboy::read_byte(gb) as u8;
+    return add_immediate_value(gb, value);
+}
+
+fn add_with_carry_immediate(gb: &mut gameboy::Gameboy) -> u8 {
+    let value = gameboy::read_byte(gb) as u8;
+    return add_with_carry_immediate_value(gb, value);
+}
+
+fn sub(gb: &mut gameboy::Gameboy, register: &str) -> u8 {
+    let a = gb.cpu.get_a();
+    let value = gb.cpu.get_register_8bit(register);
+    let (result, overflow) = a.overflowing_sub(value);
+    gb.cpu.set_z_flag(result == 0);
+    gb.cpu.set_n_flag(true);
+    gb.cpu.set_h_flag((a & 0xF) < (value & 0xF));
+    gb.cpu.set_c_flag(overflow);
+    gb.cpu.set_a(result);
+    return result;
+}
+
+fn sub_with_carry(gb: &mut gameboy::Gameboy, register: &str) -> u8 {
+    let a = gb.cpu.get_a();
+    let value = gb.cpu.get_register_8bit(register);
+    let carry = if gb.cpu.get_c_flag() { 1 } else { 0 };
+    let result = a.wrapping_sub(value).wrapping_sub(carry);
+    gb.cpu.set_z_flag(result == 0);
+    gb.cpu.set_n_flag(true);
+    gb.cpu.set_h_flag((a & 0xF) < (value & 0xF) + carry);
+    gb.cpu.set_c_flag(a < value + carry);
+    gb.cpu.set_a(result);
+    return result;
+}
+
+fn sub_immediate_value(gb: &mut gameboy::Gameboy, value: u8) -> u8 {
+    // cheat and reuse the logic from add
+    let temp = gb.cpu.get_b();
+    gb.cpu.set_b(value);
+    let result = sub(gb, "b");
+    gb.cpu.set_b(temp);
+    gb.cpu.set_a(result);
+    return result;
+}
+
+fn sub_with_carry_immediate_value(gb: &mut gameboy::Gameboy, value: u8) -> u8 {
+    // cheat and reuse the logic from add
+    let temp = gb.cpu.get_b();
+    gb.cpu.set_b(value);
+    let result = sub_with_carry(gb, "b");
+    gb.cpu.set_b(temp);
+    gb.cpu.set_a(result);
+    return result;
+}
+
+fn sub_immediate(gb: &mut gameboy::Gameboy) -> u8 {
+    let value = gameboy::read_byte(gb) as u8;
+    return sub_immediate_value(gb, value);
+}
+
+fn sub_with_carry_immediate(gb: &mut gameboy::Gameboy) -> u8 {
+    let value = gameboy::read_byte(gb) as u8;
+    return sub_with_carry_immediate_value(gb, value);
+}
+
+fn compare(gb: &mut gameboy::Gameboy, register: &str) {
+    let a = gb.cpu.get_a();
+    let value = gb.cpu.get_register_8bit(register);
+    let (result, overflow) = a.overflowing_sub(value);
+    gb.cpu.set_z_flag(result == 0);
+    gb.cpu.set_n_flag(true);
+    gb.cpu.set_h_flag((a & 0xF) < (value & 0xF));
+    gb.cpu.set_c_flag(overflow);
+}
+
+fn compare_immediate_value(gb: &mut gameboy::Gameboy, value: u8) {
+    // cheat and reuse the logic from add
+    let temp = gb.cpu.get_b();
+    gb.cpu.set_b(value);
+    compare(gb, "b");
+    gb.cpu.set_b(temp);
+}
+
+fn compare_immediate(gb: &mut gameboy::Gameboy) {
+    let value = gameboy::read_byte(gb) as u8;
+    compare_immediate_value(gb, value);
+}
+
+fn xor(gb: &mut gameboy::Gameboy, register: &str) -> u8 {
+    let a = gb.cpu.get_a();
+    let value = gb.cpu.get_register_8bit(register);
+    let result = a ^ value;
+    gb.cpu.set_z_flag(result == 0);
+    gb.cpu.set_h_flag(false);
+    gb.cpu.set_c_flag(false);
+    gb.cpu.set_n_flag(false);
+    gb.cpu.set_register_8bit("a", result);
+    return result;
+}
+
+fn xor_immediate(gb: &mut gameboy::Gameboy) -> u8 {
+    let value = gameboy::read_byte(gb) as u8;
+    let temp = gb.cpu.get_b();
+    gb.cpu.set_b(value);
+    let result = xor(gb, "b");
+    gb.cpu.set_b(temp);
+    return result;
+}
+
+fn or(gb: &mut gameboy::Gameboy, register: &str) -> u8 {
+    let a = gb.cpu.get_a();
+    let value = gb.cpu.get_register_8bit(register);
+    let result = a | value;
+    gb.cpu.set_z_flag(result == 0);
+    gb.cpu.set_h_flag(false);
+    gb.cpu.set_c_flag(false);
+    gb.cpu.set_n_flag(false);
+    gb.cpu.set_register_8bit("a", result);
+    return result;
+}
+
+fn or_immediate(gb: &mut gameboy::Gameboy) -> u8 {
+    let value = gameboy::read_byte(gb) as u8;
+    let temp = gb.cpu.get_b();
+    gb.cpu.set_b(value);
+    let result = or(gb, "b");
+    gb.cpu.set_b(temp);
+    return result;
+}
+
+fn and(gb: &mut gameboy::Gameboy, register: &str) -> u8 {
+    let a = gb.cpu.get_a();
+    let value = gb.cpu.get_register_8bit(register);
+    let result = a & value;
+    gb.cpu.set_z_flag(result == 0);
+    gb.cpu.set_h_flag(true);
+    gb.cpu.set_c_flag(false);
+    gb.cpu.set_n_flag(false);
+    gb.cpu.set_register_8bit("a", result);
+    return result;
+}
+
+fn and_immediate(gb: &mut gameboy::Gameboy) -> u8 {
+    let value = gameboy::read_byte(gb) as u8;
+    let temp = gb.cpu.get_b();
+    gb.cpu.set_b(value);
+    let result = and(gb, "b");
+    gb.cpu.set_b(temp);
     return result;
 }
 
@@ -2591,74 +2878,85 @@ mod tests {
     fn test_xor() {
         let mut gb = gameboy::create_gameboy();
 
-        // xor a with itself is always 0, z flag should be set
-        gb.cpu.set_a(0x00);
-        xor(&mut gb, "a");
-        assert_eq!(gb.cpu.get_a(), 0x00);
-        assert_eq!(gb.cpu.get_z_flag(), true);
-        gb.cpu.set_a(0x01);
-        xor(&mut gb, "a");
-        assert_eq!(gb.cpu.get_a(), 0x00);
-        assert_eq!(gb.cpu.get_z_flag(), true);
-
-        // xor a with b is 0 only if a == b, z flag should be set
-        gb.cpu.set_a(0x00);
-        gb.cpu.set_b(0x00);
+        // base case
+        gb.cpu.set_a(0b1111_1111);
+        gb.cpu.set_b(0b0000_0000);
         xor(&mut gb, "b");
-        assert_eq!(gb.cpu.get_b(), 0x00);
-        assert_eq!(gb.cpu.get_z_flag(), true);
+        assert_eq!(gb.cpu.get_a(), 0b1111_1111);
+        assert_eq!(gb.cpu.get_z_flag(), false);
+        assert_eq!(gb.cpu.get_n_flag(), false);
+        assert_eq!(gb.cpu.get_h_flag(), false);
+        assert_eq!(gb.cpu.get_c_flag(), false);
 
-        // xor a with b is 1 otherwise, z flag should be unset
-        gb.cpu.set_a(0x01);
-        gb.cpu.set_b(0x00);
+        // zero flag, all zero
+        gb.cpu.set_a(0b0000_0000);
+        gb.cpu.set_b(0b0000_0000);
         xor(&mut gb, "b");
-        assert_eq!(gb.cpu.get_b(), 0x01);
-        assert_eq!(gb.cpu.get_z_flag(), false);
+        assert_eq!(gb.cpu.get_a(), 0b0000_0000);
+        assert_eq!(gb.cpu.get_z_flag(), true);
+        assert_eq!(gb.cpu.get_n_flag(), false);
+        assert_eq!(gb.cpu.get_h_flag(), false);
+        assert_eq!(gb.cpu.get_c_flag(), false);
 
-        // repeat for other registers
-        gb.cpu.set_a(0x00);
-        gb.cpu.set_c(0x00);
-        gb.cpu.set_d(0x00);
-        gb.cpu.set_e(0x00);
-        gb.cpu.set_h(0x00);
-        gb.cpu.set_l(0x00);
-        xor(&mut gb, "c");
-        assert_eq!(gb.cpu.get_c(), 0x00);
+        // zero flag, all one
+        gb.cpu.set_a(0b1111_1111);
+        gb.cpu.set_b(0b1111_1111);
+        xor(&mut gb, "b");
+        assert_eq!(gb.cpu.get_a(), 0b0000_0000);
         assert_eq!(gb.cpu.get_z_flag(), true);
-        xor(&mut gb, "d");
-        assert_eq!(gb.cpu.get_d(), 0x00);
-        assert_eq!(gb.cpu.get_z_flag(), true);
-        xor(&mut gb, "e");
-        assert_eq!(gb.cpu.get_e(), 0x00);
-        assert_eq!(gb.cpu.get_z_flag(), true);
-        xor(&mut gb, "h");
-        assert_eq!(gb.cpu.get_h(), 0x00);
-        assert_eq!(gb.cpu.get_z_flag(), true);
-        xor(&mut gb, "l");
-        assert_eq!(gb.cpu.get_l(), 0x00);
-        assert_eq!(gb.cpu.get_z_flag(), true);
+        assert_eq!(gb.cpu.get_n_flag(), false);
+        assert_eq!(gb.cpu.get_h_flag(), false);
+        assert_eq!(gb.cpu.get_c_flag(), false);
+    }
 
-        gb.cpu.set_a(0x01);
-        gb.cpu.set_c(0x00);
-        gb.cpu.set_d(0x00);
-        gb.cpu.set_e(0x00);
-        gb.cpu.set_h(0x00);
-        gb.cpu.set_l(0x00);
-        xor(&mut gb, "c");
-        assert_eq!(gb.cpu.get_c(), 0x01);
+    #[test]
+    fn test_and() {
+        let mut gb = gameboy::create_gameboy();
+
+        // normal case
+        gb.cpu.set_a(0b1111_1111);
+        gb.cpu.set_b(0b1111_1111);
+        and(&mut gb, "b");
+        assert_eq!(gb.cpu.get_a(), 0b1111_1111);
         assert_eq!(gb.cpu.get_z_flag(), false);
-        xor(&mut gb, "d");
-        assert_eq!(gb.cpu.get_d(), 0x01);
+        assert_eq!(gb.cpu.get_n_flag(), false);
+        assert_eq!(gb.cpu.get_h_flag(), true);
+        assert_eq!(gb.cpu.get_c_flag(), false);
+
+        // zero flag
+        gb.cpu.set_a(0b1010_1010);
+        gb.cpu.set_b(0b0101_0101);
+        and(&mut gb, "b");
+        assert_eq!(gb.cpu.get_a(), 0b0000_0000);
+        assert_eq!(gb.cpu.get_z_flag(), true);
+        assert_eq!(gb.cpu.get_n_flag(), false);
+        assert_eq!(gb.cpu.get_h_flag(), true);
+        assert_eq!(gb.cpu.get_c_flag(), false);
+    }
+
+    #[test]
+    fn test_or() {
+        let mut gb = gameboy::create_gameboy();
+
+        // normal case
+        gb.cpu.set_a(0b1111_1111);
+        gb.cpu.set_b(0b1111_1111);
+        or(&mut gb, "b");
+        assert_eq!(gb.cpu.get_a(), 0b1111_1111);
         assert_eq!(gb.cpu.get_z_flag(), false);
-        xor(&mut gb, "e");
-        assert_eq!(gb.cpu.get_e(), 0x01);
-        assert_eq!(gb.cpu.get_z_flag(), false);
-        xor(&mut gb, "h");
-        assert_eq!(gb.cpu.get_h(), 0x01);
-        assert_eq!(gb.cpu.get_z_flag(), false);
-        xor(&mut gb, "l");
-        assert_eq!(gb.cpu.get_l(), 0x01);
-        assert_eq!(gb.cpu.get_z_flag(), false);
+        assert_eq!(gb.cpu.get_n_flag(), false);
+        assert_eq!(gb.cpu.get_h_flag(), false);
+        assert_eq!(gb.cpu.get_c_flag(), false);
+
+        // zero flag
+        gb.cpu.set_a(0b0000_0000);
+        gb.cpu.set_b(0b0000_0000);
+        or(&mut gb, "b");
+        assert_eq!(gb.cpu.get_a(), 0b0000_0000);
+        assert_eq!(gb.cpu.get_z_flag(), true);
+        assert_eq!(gb.cpu.get_n_flag(), false);
+        assert_eq!(gb.cpu.get_h_flag(), false);
+        assert_eq!(gb.cpu.get_c_flag(), false);
     }
 
     #[test]
@@ -2699,6 +2997,96 @@ mod tests {
         gb.cpu.set_bc(0x0001);
         decrement_16bit(&mut gb, "bc");
         assert_eq!(gb.cpu.get_bc(), 0x0000);
+    }
+
+    #[test]
+    fn test_add() {
+        let mut gb = gameboy::create_gameboy();
+
+        // normal case
+        gb.cpu.set_a(0x01);
+        gb.cpu.set_b(0x01);
+        add(&mut gb, "b");
+        assert_eq!(gb.cpu.get_a(), 0x02);
+        assert_eq!(gb.cpu.get_z_flag(), false);
+        assert_eq!(gb.cpu.get_n_flag(), false);
+        assert_eq!(gb.cpu.get_h_flag(), false);
+        assert_eq!(gb.cpu.get_c_flag(), false);
+
+        // zero flag
+        gb.cpu.set_a(0x00);
+        gb.cpu.set_b(0x00);
+        add(&mut gb, "b");
+        assert_eq!(gb.cpu.get_a(), 0x00);
+        assert_eq!(gb.cpu.get_z_flag(), true);
+        assert_eq!(gb.cpu.get_n_flag(), false);
+        assert_eq!(gb.cpu.get_h_flag(), false);
+        assert_eq!(gb.cpu.get_c_flag(), false);
+
+        // half carry flag
+        gb.cpu.set_a(0b1000_1111);
+        gb.cpu.set_b(0b0000_0001);
+        add(&mut gb, "b");
+        assert_eq!(gb.cpu.get_a(), 0b1001_0000);
+        assert_eq!(gb.cpu.get_z_flag(), false);
+        assert_eq!(gb.cpu.get_n_flag(), false);
+        assert_eq!(gb.cpu.get_h_flag(), true);
+        assert_eq!(gb.cpu.get_c_flag(), false);
+
+        // carry flag
+        gb.cpu.set_a(0xFF);
+        gb.cpu.set_b(0x01);
+        add(&mut gb, "b");
+        assert_eq!(gb.cpu.get_a(), 0x00);
+        assert_eq!(gb.cpu.get_z_flag(), true);
+        assert_eq!(gb.cpu.get_n_flag(), false);
+        assert_eq!(gb.cpu.get_h_flag(), true);
+        assert_eq!(gb.cpu.get_c_flag(), true);
+    }
+
+    #[test]
+    fn test_sub() {
+        let mut gb = gameboy::create_gameboy();
+
+        // normal case
+        gb.cpu.set_a(0x02);
+        gb.cpu.set_b(0x01);
+        sub(&mut gb, "b");
+        assert_eq!(gb.cpu.get_a(), 0x01);
+        assert_eq!(gb.cpu.get_z_flag(), false);
+        assert_eq!(gb.cpu.get_n_flag(), true);
+        assert_eq!(gb.cpu.get_h_flag(), false);
+        assert_eq!(gb.cpu.get_c_flag(), false);
+
+        // zero flag
+        gb.cpu.set_a(0x01);
+        gb.cpu.set_b(0x01);
+        sub(&mut gb, "b");
+        assert_eq!(gb.cpu.get_a(), 0x00);
+        assert_eq!(gb.cpu.get_z_flag(), true);
+        assert_eq!(gb.cpu.get_n_flag(), true);
+        assert_eq!(gb.cpu.get_h_flag(), false);
+        assert_eq!(gb.cpu.get_c_flag(), false);
+
+        // half carry flag
+        gb.cpu.set_a(0b1000_0000);
+        gb.cpu.set_b(0b0000_0001);
+        sub(&mut gb, "b");
+        assert_eq!(gb.cpu.get_a(), 0b0111_1111);
+        assert_eq!(gb.cpu.get_z_flag(), false);
+        assert_eq!(gb.cpu.get_n_flag(), true);
+        assert_eq!(gb.cpu.get_h_flag(), true);
+        assert_eq!(gb.cpu.get_c_flag(), false);
+
+        // carry flag
+        gb.cpu.set_a(0x00);
+        gb.cpu.set_b(0x01);
+        sub(&mut gb, "b");
+        assert_eq!(gb.cpu.get_a(), 0xFF);
+        assert_eq!(gb.cpu.get_z_flag(), false);
+        assert_eq!(gb.cpu.get_n_flag(), true);
+        assert_eq!(gb.cpu.get_h_flag(), true);
+        assert_eq!(gb.cpu.get_c_flag(), true);
     }
 
     #[test]

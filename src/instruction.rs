@@ -19,10 +19,7 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x01 => {
             // LD BC n16
-            cpu::dump_registers(&gb.cpu);
-            // print ram
-            println!("{:?}", gb.ram);
-            panic!("NOP");
+            load_immediate_16bit(gb, "bc");
             cycles += 12;
         }
         0x02 => {
@@ -57,6 +54,12 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x08 => {
             // LD a16 SP
+            // Store the lower byte of stack pointer SP at the address
+            // specified by the 16-bit immediate operand a16, and store the
+            // upper byte of SP at address a16 + 1.
+            let addr = gameboy::read_short(gb);
+            gb.ram[addr as usize] = gb.cpu.get_sp() as u8;
+            gb.ram[(addr + 1) as usize] = (gb.cpu.get_sp() >> 8) as u8;
             cycles += 20;
         }
         0x09 => {
@@ -96,6 +99,7 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0x11 => {
             // LD DE n16
+            load_immediate_16bit(gb, "de");
             cycles += 12;
         }
         0x12 => {
@@ -962,6 +966,8 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0xBE => {
             // CP HL
+            let addr = gb.cpu.get_hl();
+            
             cycles += 8;
         }
         0xBF => {
@@ -977,6 +983,7 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0xC1 => {
             // POP BC
+            pop(gb, "bc");
             cycles += 12;
         }
         0xC2 => {
@@ -999,6 +1006,7 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0xC5 => {
             // PUSH BC
+            push(gb, "bc");
             cycles += 16;
         }
         0xC6 => {
@@ -1061,6 +1069,7 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0xD1 => {
             // POP DE
+            pop(gb, "de");
             cycles += 12;
         }
         0xD2 => {
@@ -1083,6 +1092,7 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0xD5 => {
             // PUSH DE
+            push(gb, "de");
             cycles += 16;
         }
         0xD6 => {
@@ -1136,10 +1146,15 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0xE0 => {
             // LDH a8 A
+            // Load to the address specified by the 8-bit immediate operand + 0xFF00, data from the 8-bit A register.
+            let addr = 0xFF00 + gameboy::read_byte(gb) as u16;
+            let data = gb.cpu.get_a();
+            gb.ram[addr as usize] = data;
             cycles += 12;
         }
         0xE1 => {
             // POP HL
+            pop(gb, "hl");
             cycles += 12;
         }
         0xE2 => {
@@ -1160,6 +1175,7 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0xE5 => {
             // PUSH HL
+            push(gb, "hl");
             cycles += 16;
         }
         0xE6 => {
@@ -1208,10 +1224,15 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0xF0 => {
             // LDH A a8
+            // Load to the 8-bit A register, data from the address specified by the 8-bit immediate operand + 0xFF00.
+            let addr = 0xFF00 + gameboy::read_byte(gb) as u16;
+            let data = gb.ram[addr as usize];
+            gb.cpu.set_a(data);
             cycles += 12;
         }
         0xF1 => {
             // POP AF
+            pop(gb, "af");
             cycles += 12;
         }
         0xF2 => {
@@ -1232,6 +1253,7 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0xF5 => {
             // PUSH AF
+            push(gb, "af");
             cycles += 16;
         }
         0xF6 => {
@@ -1248,6 +1270,7 @@ pub fn execute_instruction(gb: &mut gameboy::Gameboy, opcode: u16) -> i64 {
         }
         0xF9 => {
             // LD SP HL
+            load_register_16bit(gb, "sp", "hl");
             cycles += 8;
         }
         0xFA => {
@@ -2493,6 +2516,22 @@ fn load_register_16bit(gb: &mut gameboy::Gameboy, dest: &str, src: &str) {
     load_16bit(gb, dest, src_value);
 }
 
+// Stack functions
+fn push(gb: &mut gameboy::Gameboy, register: &str) {
+    let value = gb.cpu.get_register_16bit(register);
+    let addr = gb.cpu.get_sp() - 2;
+    gb.cpu.set_sp(addr);
+    gb.ram[addr as usize] = (value & 0xFF) as u8;
+    gb.ram[(addr + 1) as usize] = ((value >> 8) & 0xFF) as u8;
+}
+
+fn pop(gb: &mut gameboy::Gameboy, register: &str) {
+    let addr = gb.cpu.get_sp();
+    let value = (gb.ram[(addr + 1) as usize] as u16) << 8 | gb.ram[addr as usize] as u16;
+    gb.cpu.set_sp(addr + 2);
+    load_16bit(gb, register, value);
+}
+
 // ALU functions
 fn increment_8bit(gb: &mut gameboy::Gameboy, register: &str) -> u8 {
     let current = gb.cpu.get_register_8bit(register);
@@ -2660,5 +2699,28 @@ mod tests {
         gb.cpu.set_bc(0x0001);
         decrement_16bit(&mut gb, "bc");
         assert_eq!(gb.cpu.get_bc(), 0x0000);
+    }
+
+    #[test]
+    fn test_push() {
+        let mut gb = gameboy::create_gameboy();
+        gb.cpu.set_sp(0xFFFE);
+        gb.cpu.set_bc(0x1234);
+        push(&mut gb, "bc");
+        assert_eq!(gb.cpu.get_sp(), 0xFFFC);
+        let addr = gb.cpu.get_sp();
+        assert_eq!(gb.ram[(addr + 1) as usize], 0x12);
+        assert_eq!(gb.ram[addr as usize], 0x34);
+    }
+
+    #[test]
+    fn test_pop() {
+        let mut gb = gameboy::create_gameboy();
+        gb.cpu.set_sp(0xFFFE);
+        gb.cpu.set_bc(0x1234);
+        push(&mut gb, "bc");
+        pop(&mut gb, "hl");
+        assert_eq!(gb.cpu.get_sp(), 0xFFFE);
+        assert_eq!(gb.cpu.get_hl(), 0x1234);
     }
 }
